@@ -1,0 +1,13 @@
+# dependencies and build output are recreated by `npm install` / `npm run build`
+node_modules/
+dist/
+
+# local files
+.env
+.env.*
+*.local
+.vercel/
+.taste-skill/
+npm-debug.log*
+.DS_Store
+Thumbs.db
