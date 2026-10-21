@@ -1,0 +1,209 @@
+@import 'tailwindcss';
+
+/* Layout and type follow jiep_digi_ms/wwwroot/css; colours come from the logo:
+   orange #F36D25 and charcoal #504E4E. */
+@font-face { font-family: 'Atkinson Hyperlegible Next'; src: url('/fonts/atkinson-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; src: url('/fonts/atkinson-600.woff2') format('woff2'); font-weight: 500 600; font-display: swap; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; src: url('/fonts/atkinson-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Barlow Condensed'; src: url('/fonts/barlow-condensed-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Barlow Condensed'; src: url('/fonts/barlow-condensed-800.woff2') format('woff2'); font-weight: 800; font-display: swap; }
+
+@theme {
+  --font-sans: 'Atkinson Hyperlegible Next', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+
+  --color-ground: #f4f3f1;
+  --color-surface: #fdfcfb;
+  --color-surface-2: #eceae7;
+  --color-surface-3: #e0ddd9;
+  --color-ink: #262424;
+  --color-ink-2: #5c5858;
+  --color-ink-3: #8e8988;
+  --color-line: #dcd8d4;
+
+  /* Logo orange, darkened so white text on it and orange text on white stay readable (6.5:1). */
+  --color-accent: #c2500f;
+  --color-accent-strong: #9a3f0b;
+  --color-accent-soft: #fdeee5;
+  --color-accent-200: #f8c9ac;
+  /* The logo orange itself, for highlights only (cuts, underlines, hover marks). */
+  --color-sorot: #f36d25;
+  --color-sorot-soft: #fde4d4;
+
+  /* Logo charcoal for the header, hero and login panel. */
+  --color-nav: #504e4e;
+  --color-nav-2: #3b3939;
+  --color-nav-ink: #e4e1df;
+
+  --color-ok: #1f6b45;
+  --color-ok-soft: #e4f2ea;
+  --color-warn: #7a5200;
+  --color-warn-soft: #fff3cc;
+  --color-bad: #b3261e;
+  --color-bad-soft: #fbe9e7;
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.tnum { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+::selection { background: var(--color-sorot-soft); }
+
+/* Big uppercase condensed headings, as .judul-halaman */
+.judul {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+
+/* ---------- Header (kepala) ---------- */
+.kepala { background: var(--color-nav); color: var(--color-surface); }
+.kepala :focus-visible { outline-color: var(--color-sorot); }
+.merek {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .375rem .75rem;
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .01em;
+  text-decoration: none;
+}
+.merek img { display: block; width: auto; height: 32px; }
+.kepala__divisi {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.kepala__kontrol {
+  height: 2.75rem;
+  border: 2px solid rgba(252, 252, 250, .55);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-surface);
+  font-weight: 600;
+}
+.kepala__kontrol:hover { background: rgba(252, 252, 250, .18); }
+.kepala__kontrol option { color: var(--color-ink); }
+.kepala__kontrol::placeholder { color: rgba(252, 252, 250, .75); }
+
+/* ---------- Hero with the orange cut (hero / hero__biru / hero__segitiga) ---------- */
+.hero {
+  --potong: 3rem;
+  padding-bottom: 12px;
+  background: var(--color-sorot);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--potong)), 0 100%);
+}
+.hero__biru {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.75rem, 5vw, 3.25rem) 0 calc(var(--potong) + clamp(1.25rem, 3.5vw, 2.5rem));
+  background: var(--color-nav);
+  color: var(--color-surface);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--potong)), 0 100%);
+}
+.hero__segitiga {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: clamp(14rem, 34%, 30rem);
+  height: 80%;
+  background: var(--color-sorot);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.hero__dalam { position: relative; z-index: 1; }
+.hero h1 { font-size: clamp(2.75rem, 1.4rem + 5.5vw, 5.75rem); margin: 0; }
+.hero p { max-width: 52ch; margin: .75rem 0 0; color: var(--color-nav-ink); font-size: clamp(1.125rem, 1rem + .5vw, 1.375rem); }
+.hero--kecil h1 { font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem); }
+
+/* ---------- Module cards ---------- */
+.modul-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr)); }
+.modul {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.modul:hover, .modul:focus-visible { background: var(--color-accent-soft); border-color: var(--color-accent); }
+.modul:focus-visible { outline: 3px solid var(--color-accent); outline-offset: -5px; }
+.modul__ikon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 4px;
+  background: var(--color-accent);
+  color: var(--color-surface);
+}
+.modul__kode { margin-top: 1.25rem; font-family: var(--font-display); font-size: 2.25rem; font-weight: 800; line-height: 1; letter-spacing: .02em; text-transform: uppercase; }
+.modul__nama { margin-top: .25rem; font-size: 1.125rem; font-weight: 700; line-height: 1.25; }
+.modul__hint { margin-top: .625rem; color: var(--color-ink-2); font-size: 1rem; line-height: 1.5; }
+
+/* ---------- Feature list (jenis / jenis__baris) ---------- */
+.jenis { overflow: hidden; border: 2px solid var(--color-ink); border-radius: 4px; background: var(--color-surface); }
+.jenis__baris {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1.125rem;
+  min-height: 6rem;
+  padding: 1rem 1.25rem 1rem 1.625rem;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.jenis__baris + .jenis__baris { border-top: 2px solid var(--color-ink); }
+.jenis__baris::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 0; background: var(--color-sorot); }
+.jenis__baris:hover, .jenis__baris:focus-visible { background: var(--color-accent-soft); }
+.jenis__baris:hover::before, .jenis__baris:focus-visible::before { width: 8px; }
+.jenis__baris:focus-visible { outline: 3px solid var(--color-accent); outline-offset: -5px; }
+.jenis__ikon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 4px; background: var(--color-accent); color: var(--color-surface); }
+.jenis__judul { display: block; font-size: 1.375rem; font-weight: 700; line-height: 1.25; }
+.jenis__hint { display: block; color: var(--color-ink-2); font-size: 1rem; }
+.jenis__angka { text-align: right; }
+.jenis__panah { color: var(--color-accent); }
+
+/* ---------- Breadcrumb ---------- */
+.remah { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; font-size: .9375rem; font-weight: 700; }
+.remah a { color: var(--color-accent); text-decoration: none; }
+.remah a:hover { text-decoration: underline; text-underline-offset: .2em; }
+
+@media (max-width: 47.99rem) {
+  .hero { --potong: 1.75rem; padding-bottom: 8px; }
+  .hero__segitiga { display: none; }
+
+  .jenis__baris { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 5.5rem; gap: .875rem; padding: .875rem 1rem .875rem 1.25rem; }
+  .jenis__angka { display: none; }
+  .jenis__ikon { width: 3rem; height: 3rem; }
+  .jenis__judul { font-size: 1.1875rem; }
+  .jenis__hint { font-size: .9375rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .jenis__baris::before { transition: width .12s ease-out; }
+  .rise { animation: rise 180ms ease-out both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
