@@ -23,9 +23,9 @@ function GlobalSearch({ className, autoFocus, onDone }: { className?: string; au
   const groups = useMemo(() => {
     if (term.length < 2) return null
     const mods: Hit[] = MODULES
-      .filter((m) => (m.phase || visibleFeatures(m, can).length) && (has(m.code, term) || has(m.name, term) || has(m.hint, term) || (m.plan ?? []).some((p) => has(p, term))))
-      .map((m) => ({ to: moduleHref(m), label: `${m.code} · ${m.name}`, sub: m.phase ? `Phase ${m.phase}` : 'Module' }))
-    const feats: Hit[] = MODULES.filter((m) => !m.phase).flatMap((m) => visibleFeatures(m, can)
+      .filter((m) => visibleFeatures(m, can).length && (has(m.code, term) || has(m.name, term) || has(m.hint, term)))
+      .map((m) => ({ to: moduleHref(m), label: `${m.code} · ${m.name}`, sub: 'Module' }))
+    const feats: Hit[] = MODULES.flatMap((m) => visibleFeatures(m, can)
       .filter((f) => has(f.label, term) || has(f.hint, term))
       .map((f) => ({ to: f.to, label: f.label, sub: m.code })))
     const vessels: Hit[] = can('vessel.read') ? s.vessels.filter((x) => has(x.name, term) || has(x.code, term)).slice(0, 5).map((x) => ({ to: `/vessels/${x.id}`, label: x.name, sub: x.code })) : []

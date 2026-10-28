@@ -72,27 +72,36 @@ export const compositionRules: CompositionRule[] = [
 ]
 
 export const users: User[] = [
-  { id: 'u-rina', name: 'Rina Wulandari', username: 'rina.w', email: 'rina.w@oneenergy.co.id', phone: '+62 812-4410-2231', roles: ['doc_admin'], active: true, lastLogin: '2026-10-21T07:58' },
-  { id: 'u-dedi', name: 'Dedi Saputra', username: 'dedi.s', email: 'dedi.s@oneenergy.co.id', phone: '+62 813-5521-0918', roles: ['doc_admin'], active: true, lastLogin: '2026-10-21T08:12' },
-  { id: 'u-sari', name: 'Sari Handayani', username: 'sari.h', email: 'sari.h@oneenergy.co.id', phone: '+62 811-2034-7765', roles: ['crewing'], active: true, lastLogin: '2026-10-21T08:03' },
-  { id: 'u-budi', name: 'Budi Santoso', username: 'budi.s', email: 'budi.s@oneenergy.co.id', phone: '+62 812-9087-1123', roles: ['operation'], active: true, lastLogin: '2026-10-21T06:41' },
-  { id: 'u-andi', name: 'Andi Pratama', username: 'andi.p', email: 'andi.p@oneenergy.co.id', phone: '+62 815-7712-4409', roles: ['it'], active: true, lastLogin: '2026-10-21T07:20' },
-  { id: 'u-hendra', name: 'Hendra Wijaya', username: 'hendra.w', email: 'hendra.w@oneenergy.co.id', phone: '+62 811-5009-3381', roles: ['management'], active: true, lastLogin: '2026-10-20T17:45' },
-  { id: 'u-maya', name: 'Maya Kusuma', username: 'maya.k', email: 'maya.k@oneenergy.co.id', phone: '+62 813-3320-8876', roles: ['asset'], active: true, lastLogin: '2026-10-19T10:02' },
-  { id: 'u-fajar', name: 'Fajar Nugroho', username: 'fajar.n', email: 'fajar.n@oneenergy.co.id', phone: '+62 812-6654-2210', roles: ['doc_admin'], active: false, lastLogin: '2026-09-30T16:11' },
-  { id: 'u-lina', name: 'Lina Marlina', username: 'lina.m', email: 'lina.m@oneenergy.co.id', phone: '+62 811-4478-5520', roles: ['operation', 'crewing'], active: true, lastLogin: '2026-10-20T15:30' },
+  { id: 'u-hendra', name: 'Hendra Wijaya', username: 'hendra.w', email: 'hendra.w@oneenergy.co.id', phone: '+62 811-5009-3381', roles: ['superadmin'], active: true, lastLogin: '2026-10-21T07:58' },
+  { id: 'u-rina', name: 'Rina Wulandari', username: 'rina.w', email: 'rina.w@oneenergy.co.id', phone: '+62 812-4410-2231', roles: ['sales_admin'], active: true, lastLogin: '2026-10-21T08:12' },
+  { id: 'u-sari', name: 'Sari Handayani', username: 'sari.h', email: 'sari.h@oneenergy.co.id', phone: '+62 811-2034-7765', roles: ['ops_crewing'], active: true, lastLogin: '2026-10-21T08:03' },
+  { id: 'u-maya', name: 'Maya Kusuma', username: 'maya.k', email: 'maya.k@oneenergy.co.id', phone: '+62 813-3320-8876', roles: ['ops_asset'], active: true, lastLogin: '2026-10-21T08:03' },
+  { id: 'u-budi', name: 'Budi Santoso', username: 'budi.s', email: 'budi.s@oneenergy.co.id', phone: '+62 812-9087-1123', roles: ['ops_bunker'], active: true, lastLogin: '2026-10-21T06:41' },
+  { id: 'u-andi', name: 'Andi Pratama', username: 'andi.p', email: 'andi.p@oneenergy.co.id', phone: '+62 815-7712-4409', roles: ['ops_traffic'], active: true, lastLogin: '2026-10-21T07:20' },
+  { id: 'u-fajar', name: 'Fajar Nugroho', username: 'fajar.n', email: 'fajar.n@oneenergy.co.id', phone: '+62 812-6654-2210', roles: ['ops_repair'], active: true, lastLogin: '2026-10-21T09:15' },
+  { id: 'u-lina', name: 'Lina Marlina', username: 'lina.m', email: 'lina.m@oneenergy.co.id', phone: '+62 811-4478-5520', roles: ['ops_keagenan'], active: true, lastLogin: '2026-10-20T15:30' },
+  { id: 'u-dewi', name: 'Dewi Lestari', username: 'dewi.l', email: 'dewi.l@oneenergy.co.id', phone: '+62 812-7780-3345', roles: ['procurement'], active: true, lastLogin: '2026-10-21T08:45' },
+  { id: 'u-nina', name: 'Nina Permata', username: 'nina.p', email: 'nina.p@oneenergy.co.id', phone: '+62 811-6643-8890', roles: ['finance'], active: true, lastLogin: '2026-10-21T08:30' },
 ]
 
 export const permissionCatalog: { group: string; items: { code: string; label: string; sensitive?: boolean }[] }[] = [
-  { group: 'Vessels (SISKA)', items: [
+  { group: 'Sales', items: [
+    { code: 'sales.read', label: 'View sales data' },
+    { code: 'sales.write', label: 'Create and edit sales' },
+  ] },
+  { group: 'Documents Asset TB & BG', items: [
     { code: 'vessel.read', label: 'View vessels' },
     { code: 'vessel.write', label: 'Create and edit vessels' },
     { code: 'vessel.status_change', label: 'Change vessel status' },
     { code: 'vessel.pair_manage', label: 'Manage TB/BG pairs' },
     { code: 'asset.read', label: 'View vessel assets' },
     { code: 'asset.write', label: 'Edit vessel assets' },
+    { code: 'document.read', label: 'View documents' },
+    { code: 'document_vessel.write', label: 'Write vessel documents' },
+    { code: 'document_crew.write', label: 'Write crew documents' },
+    { code: 'followup.write', label: 'Update follow-up status' },
   ] },
-  { group: 'Crew (SI-CREW)', items: [
+  { group: 'Crewing', items: [
     { code: 'crew.read', label: 'View crew' },
     { code: 'crew.write', label: 'Create and edit crew' },
     { code: 'crew_private.read', label: 'View personal data', sensitive: true },
@@ -100,15 +109,39 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
     { code: 'assignment.write', label: 'Sign on / sign off' },
     { code: 'composition.manage', label: 'Manage minimum composition' },
   ] },
-  { group: 'Documents (E-DOC) and reminders (SINAR)', items: [
-    { code: 'document.read', label: 'View documents' },
-    { code: 'document_vessel.write', label: 'Write vessel documents' },
-    { code: 'document_crew.write', label: 'Write crew documents' },
-    { code: 'followup.write', label: 'Update follow-up status' },
-    { code: 'reminder.config', label: 'Configure reminders and recipients' },
-    { code: 'notification.read', label: 'Monitor notifications' },
+  { group: 'Bunker', items: [
+    { code: 'bunker.read', label: 'View bunker data' },
+    { code: 'bunker.write', label: 'Manage bunker operations' },
   ] },
-  { group: 'Readiness and dashboards (SIAP, Dashboard)', items: [
+  { group: 'Traffic', items: [
+    { code: 'traffic.read', label: 'View traffic data' },
+    { code: 'traffic.write', label: 'Manage vessel traffic' },
+  ] },
+  { group: 'Port Agency (Keagenan)', items: [
+    { code: 'keagenan.read', label: 'View port agency data' },
+    { code: 'keagenan.write', label: 'Manage port agency' },
+  ] },
+  { group: 'Maintenance & Repair', items: [
+    { code: 'maintenance.read', label: 'View maintenance data' },
+    { code: 'maintenance.write', label: 'Manage maintenance' },
+  ] },
+  { group: 'Procurement', items: [
+    { code: 'procurement.read', label: 'View procurement data' },
+    { code: 'procurement.write', label: 'Manage procurement' },
+  ] },
+  { group: 'Document Support', items: [
+    { code: 'doc_support.read', label: 'View document support' },
+    { code: 'doc_support.write', label: 'Manage document support' },
+  ] },
+  { group: 'Billing', items: [
+    { code: 'billing.read', label: 'View billing data' },
+    { code: 'billing.write', label: 'Manage billing' },
+  ] },
+  { group: 'Payment', items: [
+    { code: 'payment.read', label: 'View payment data' },
+    { code: 'payment.write', label: 'Manage payments' },
+  ] },
+  { group: 'Dashboard', items: [
     { code: 'readiness.read', label: 'View sailing readiness' },
     { code: 'dashboard.management', label: 'Management dashboard' },
     { code: 'dashboard.tasks', label: 'Task dashboard' },
@@ -125,12 +158,16 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
 ]
 
 export const roles: Role[] = [
-  { id: 'doc_admin', name: 'Document Admin', description: 'Enters vessel data, records and renews vessel and crew documents; receives expiry reminders.', permissions: ['vessel.read', 'vessel.write', 'crew.read', 'document.read', 'document_vessel.write', 'document_crew.write', 'followup.write', 'readiness.read', 'dashboard.tasks', 'export.run'] },
-  { id: 'crewing', name: 'Crewing / HR', description: 'Manages crew, assignments, certificates and contracts. Only role that sees personal data.', permissions: ['vessel.read', 'crew.read', 'crew.write', 'crew_private.read', 'contract.read', 'assignment.write', 'document.read', 'document_crew.write', 'followup.write', 'readiness.read', 'dashboard.tasks', 'export.run'] },
-  { id: 'operation', name: 'Operation', description: 'Knows which vessels can sail and who is aboard. Changes vessel status.', permissions: ['vessel.read', 'vessel.status_change', 'vessel.pair_manage', 'crew.read', 'document.read', 'readiness.read', 'dashboard.operations', 'export.run'] },
-  { id: 'it', name: 'IT', description: 'Users, roles, master data, reminder configuration and system monitoring.', permissions: ['vessel.read', 'crew.read', 'document.read', 'reminder.config', 'notification.read', 'readiness.read', 'dashboard.management', 'user.manage', 'role.manage', 'audit.read', 'config.manage', 'master.manage', 'composition.manage', 'vessel.write'] },
-  { id: 'management', name: 'Management', description: 'Fleet and risk overview on one screen.', permissions: ['vessel.read', 'readiness.read', 'dashboard.management', 'document.read', 'export.run'] },
-  { id: 'asset', name: 'Asset', description: 'Maintains vessel asset data.', permissions: ['vessel.read', 'asset.read', 'asset.write', 'readiness.read', 'dashboard.operations'] },
+  { id: 'superadmin', name: 'Super Admin', description: 'Full access to all modules and features across the entire system.', permissions: permissionCatalog.flatMap((g) => g.items.map((i) => i.code)).concat(['user.manage', 'role.manage', 'audit.read', 'config.manage', 'master.manage']) },
+  { id: 'sales_admin', name: 'Sales Admin', description: 'Manages the commercial process from RFQ to Sales Order.', permissions: ['sales.read', 'sales.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_crewing', name: 'Operational Crewing', description: 'Manages crew, assignments, certificates and contracts.', permissions: ['crew.read', 'crew.write', 'crew_private.read', 'contract.read', 'assignment.write', 'composition.manage', 'vessel.read', 'document.read', 'document_crew.write', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'ops_asset', name: 'Operational Asset', description: 'Manages vessel data, documents, assets, certificates and regulatory compliance for TB & BG.', permissions: ['vessel.read', 'vessel.write', 'vessel.status_change', 'vessel.pair_manage', 'asset.read', 'asset.write', 'document.read', 'document_vessel.write', 'document_crew.write', 'followup.write', 'crew.read', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'ops_bunker', name: 'Operational Bunker', description: 'Manages vessel fuel planning, delivery and stock monitoring.', permissions: ['bunker.read', 'bunker.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_traffic', name: 'Operational Traffic', description: 'Monitors vessel movements, tracking and daily reporting.', permissions: ['traffic.read', 'traffic.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_repair', name: 'Operational Repair', description: 'Plans and records vessel maintenance and repairs.', permissions: ['maintenance.read', 'maintenance.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_keagenan', name: 'Operational Keagenan', description: 'Handles port agency, clearance, logistics and vessel supply.', permissions: ['keagenan.read', 'keagenan.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'procurement', name: 'Procurement', description: 'Manages purchasing, vendors, delivery, bunker procurement, maintenance procurement and document support.', permissions: ['procurement.read', 'procurement.write', 'bunker.read', 'maintenance.read', 'doc_support.read', 'doc_support.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'finance', name: 'Finance', description: 'Manages billing to customer and payment to vendor, including invoicing, 3-way matching and accounts.', permissions: ['billing.read', 'billing.write', 'payment.read', 'payment.write', 'sales.read', 'procurement.read', 'readiness.read', 'dashboard.tasks'] },
 ]
 
 export const templates: Template[] = [
@@ -156,4 +193,4 @@ export const config: ConfigItem[] = [
   { key: 'kesiapan.jam_snapshot', label: 'Readiness snapshot time', value: '23:00', description: 'Daily snapshot of every vessel’s readiness for trends.' },
 ]
 
-export const escalation: Escalation = { active: false, daysBefore: 14, recipientRole: 'management', channels: ['email'] }
+export const escalation: Escalation = { active: false, daysBefore: 14, recipientRole: 'superadmin', channels: ['email'] }

@@ -7,7 +7,7 @@ export type DocStatus = 'valid' | 'soon' | 'expired'
 export type FollowUp = 'pending' | 'in_progress' | 'done'
 export type CrewStatus = 'on_duty' | 'leave' | 'standby' | 'inactive'
 export type Employment = 'permanent' | 'contract'
-export type RoleId = 'doc_admin' | 'crewing' | 'operation' | 'it' | 'management' | 'asset'
+export type RoleId = 'superadmin' | 'sales_admin' | 'ops_crewing' | 'ops_asset' | 'ops_bunker' | 'ops_traffic' | 'ops_repair' | 'ops_keagenan' | 'procurement' | 'finance'
 
 export interface Vessel {
   id: string

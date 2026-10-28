@@ -92,6 +92,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const asParam = new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('as')
     if (asParam) return asParam
     try { return localStorage.getItem('oe.me') ?? 'u-hendra' } catch { return 'u-hendra' }
+    // u-hendra is the Super Admin user
   })
 
   // Signed-in state lives for the browser tab: a refresh keeps you in, a new tab starts at the login page.
@@ -141,7 +142,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     s, me, setMe, signedIn, signIn, signOut,
-    can: (p) => perms.has(p),
+    can: (p) => me.roles.includes('superadmin' as any) || perms.has(p),
     hasRole: (r) => me.roles.includes(r),
     assessments,
     currentDocs,

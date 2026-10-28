@@ -184,11 +184,11 @@ const LEVEL: Record<string, string> = { MASTER: 'ANT-III', CO: 'ANT-IV', '2O': '
 
 function vesselRecipient() {
   const x = rand()
-  return x < 0.55 ? 'u-rina' : x < 0.92 ? 'u-dedi' : 'u-fajar'
+  return x < 0.55 ? 'u-rina' : x < 0.92 ? 'u-maya' : 'u-fajar'
 }
 function crewRecipient() {
   const x = rand()
-  return x < 0.5 ? 'u-dedi' : x < 0.9 ? 'u-rina' : 'u-fajar'
+  return x < 0.5 ? 'u-maya' : x < 0.9 ? 'u-rina' : 'u-fajar'
 }
 
 function makeDoc(typeId: string, ownerKind: 'vessel' | 'crew', ownerId: string, ownerCode: string, mode: Mode, recipientId: string, rank?: string): Doc {

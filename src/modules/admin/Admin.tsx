@@ -11,7 +11,7 @@ import { useStore } from '../../store'
 function UserForm({ open, onClose, user }: { open: boolean; onClose: () => void; user?: User }) {
   const { s, addUser, updateUser } = useStore()
   const toast = useToast()
-  const blank = { name: '', username: '', email: '', phone: '', roles: ['doc_admin'] as RoleId[] }
+  const blank = { name: '', username: '', email: '', phone: '', roles: ['ops_asset'] as RoleId[] }
   const [f, setF] = useState(blank)
   useEffect(() => { if (open) setF(user ? { name: user.name, username: user.username, email: user.email, phone: user.phone, roles: [...user.roles] } : blank) }, [open, user]) // eslint-disable-line react-hooks/exhaustive-deps
   const taken = s.users.some((u) => u.id !== user?.id && u.username === f.username.trim().toLowerCase())

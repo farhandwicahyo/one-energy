@@ -39,12 +39,16 @@ export const followUpLabel: Record<FollowUp, string> = {
 }
 
 export const roleLabel: Record<RoleId, string> = {
-  doc_admin: 'Document Admin',
-  crewing: 'Crewing / HR',
-  operation: 'Operation',
-  it: 'IT',
-  management: 'Management',
-  asset: 'Asset',
+  superadmin: 'Super Admin',
+  sales_admin: 'Sales Admin',
+  ops_crewing: 'Operational Crewing',
+  ops_asset: 'Operational Asset',
+  ops_bunker: 'Operational Bunker',
+  ops_traffic: 'Operational Traffic',
+  ops_repair: 'Operational Repair',
+  ops_keagenan: 'Operational Keagenan',
+  procurement: 'Procurement',
+  finance: 'Finance',
 }
 
 export const vesselKindLabel = { TB: 'Tug Boat', BG: 'Barge' } as const

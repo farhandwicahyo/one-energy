@@ -22,7 +22,7 @@ export default function Dashboard() {
     return v
   }, [can])
   const [view, setView] = useState<View | null>(null)
-  const active = view && views.some((v) => v.value === view) ? view : views[me.roles.includes('it') ? views.length - 1 : 0]?.value
+  const active = view && views.some((v) => v.value === view) ? view : views[0]?.value
 
   const first = me.name.split(' ')[0]
   return (
@@ -153,7 +153,7 @@ function TasksView() {
   const nav = useNavigate()
   const [scope, setScope] = useState<'mine' | 'all'>('mine')
   const [renew, setRenew] = useState<Doc | null>(null)
-  const crewing = hasRole('crewing') && !hasRole('doc_admin')
+  const crewing = hasRole('ops_crewing') && !hasRole('ops_asset')
 
   // SIMON-02: everything that needs action, nearest expiry first. Renewed items leave the list.
   const tasks: TaskRow[] = useMemo(() => rows
