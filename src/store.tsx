@@ -2,7 +2,9 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { config as seedConfig, docTypeById, docTypes as seedDocTypes, escalation as seedEscalation, rankByCode, ranks as masterRanks, roles as seedRoles, templates as seedTemplates, users as seedUsers, vesselTypes as seedVesselTypes } from './data/master'
 import { seed } from './data/seed'
-import type { AuditDiff, AuditEntry, Crew, CrewPrivate, Doc, DocType, FollowUp, OpStatus, Rank, Readiness, RoleId, Vessel, VesselAsset } from './data/types'
+import { commercialSheets as seedCS, purchaseOrders as seedPOs, quotations as seedQuotations, rfqs as seedRFQs, salesOrders as seedSOs } from './data/sales-seed'
+import { purchaseRequests as seedPRs } from './data/procurement-seed'
+import type { AuditDiff, AuditEntry, CommercialSheet, Crew, CrewPrivate, Doc, DocType, FollowUp, NegotiationRound, OpStatus, PurchaseOrder, PurchaseRequest, Quotation, QuotationItem, Rank, RFQ, Readiness, RoleId, SalesOrder, Vessel, VesselAsset } from './data/types'
 import { addDays, nowStamp, TODAY } from './lib/dates'
 import { assessVessel, buildIndex, docStatus, worst, type Assessment } from './lib/rules'
 
@@ -19,6 +21,12 @@ function initialState() {
     escalation: clone(seedEscalation),
     vesselTypes: clone(seedVesselTypes),
     ranks: clone(masterRanks),
+    rfqs: clone(seedRFQs),
+    quotations: clone(seedQuotations),
+    purchaseOrders: clone(seedPOs),
+    salesOrders: clone(seedSOs),
+    commercialSheets: clone(seedCS),
+    purchaseRequests: clone(seedPRs),
   }
 }
 export type State = ReturnType<typeof initialState>
@@ -73,6 +81,26 @@ interface Store {
   deleteDocument: (id: string, reason: string) => void
   saveVesselType: (t: State['vesselTypes'][number]) => void
   saveRank: (r: Rank, isNew: boolean) => void
+  // Sales
+  addRFQ: (data: Omit<RFQ, 'id' | 'rfqNo' | 'createdBy' | 'createdAt'>) => string
+  addQuotation: (data: Omit<Quotation, 'id' | 'quotationNo' | 'negotiations' | 'currentRound' | 'status' | 'createdBy' | 'createdAt'>) => string
+  updateQuotation: (id: string, patch: Partial<Quotation>) => void
+  submitNegotiation: (quotationId: string, salesPrice: number) => void
+  approveNegotiation: (quotationId: string, round: number) => void
+  rejectNegotiation: (quotationId: string, round: number) => void
+  customerRespondNegotiation: (quotationId: string, round: number, response: 'ok' | 'reject') => void
+  addPO: (data: Omit<PurchaseOrder, 'id' | 'poNo' | 'createdBy' | 'createdAt'>) => string
+  updatePO: (id: string, patch: Partial<PurchaseOrder>) => void
+  addSO: (data: Omit<SalesOrder, 'id' | 'soNo' | 'createdBy' | 'createdAt'>) => string
+  updateSO: (id: string, patch: Partial<SalesOrder>) => void
+  addCommercialSheet: (data: Omit<CommercialSheet, 'id' | 'csNo' | 'createdBy' | 'createdAt'>) => string
+  updateCommercialSheet: (id: string, patch: Partial<CommercialSheet>) => void
+  deleteCommercialSheet: (id: string) => void
+  // Procurement
+  addPurchaseRequest: (data: Omit<PurchaseRequest, 'id' | 'prNo' | 'createdBy' | 'createdAt'>) => string
+  updatePurchaseRequest: (id: string, patch: Partial<PurchaseRequest>) => void
+  approvePR: (id: string) => void
+  rejectPR: (id: string) => void
 }
 
 // Before/after pairs for the audit log, only for fields that actually changed.
@@ -494,6 +522,172 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
     },
   }
+
+  // ---------- Sales ----------
+  store.addRFQ = (data) => {
+    const id = `rfq-x-${Date.now()}`
+    const rfqNo = `RFQ-2026-${String(s.rfqs.length + 1).padStart(4, '0')}`
+    setS((st) => ({
+      ...st,
+      rfqs: [...st.rfqs, { ...data, id, rfqNo, createdBy: me.id, createdAt: nowStamp() }],
+      audit: audit({ action: 'insert', table: 'tbl_t_rfq', rowLabel: rfqNo, diff: [{ field: 'customer', before: null, after: data.customerName }] }, st),
+    }))
+    return id
+  }
+
+  store.addQuotation = (data) => {
+    const id = `quo-x-${Date.now()}`
+    const quotationNo = `QUO-2026-${String(s.quotations.length + 1).padStart(4, '0')}`
+    setS((st) => ({
+      ...st,
+      quotations: [...st.quotations, { ...data, id, quotationNo, negotiations: [], currentRound: 0, status: 'draft', createdBy: me.id, createdAt: nowStamp() }],
+      audit: audit({ action: 'insert', table: 'tbl_t_quotation', rowLabel: quotationNo, diff: [{ field: 'customer', before: null, after: data.customerName }, { field: 'total', before: null, after: String(data.totalAmount) }] }, st),
+    }))
+    return id
+  }
+
+  store.updateQuotation = (id, patch) => setS((st) => {
+    const q = st.quotations.find((x) => x.id === id)!
+    return { ...st, quotations: st.quotations.map((x) => (x.id === id ? { ...x, ...patch } : x)), audit: audit({ action: 'update', table: 'tbl_t_quotation', rowLabel: q.quotationNo, diff: diffOf(q, patch) }, st) }
+  })
+
+  store.submitNegotiation = (quotationId, salesPrice) => setS((st) => {
+    const q = st.quotations.find((x) => x.id === quotationId)!
+    const round = q.currentRound + 1
+    const neg: NegotiationRound = {
+      round, salesPrice, submittedAt: nowStamp(),
+      approvalStatus: 'pending', approvedBy: null, approvedAt: null,
+      customerResponse: null, customerRespondedAt: null,
+    }
+    return {
+      ...st,
+      quotations: st.quotations.map((x) => (x.id === quotationId ? { ...x, status: 'negotiation' as const, currentRound: round, negotiations: [...x.negotiations, neg] } : x)),
+      audit: audit({ action: 'update', table: 'tbl_t_quotation', rowLabel: q.quotationNo, diff: [{ field: 'negotiation_round', before: String(q.currentRound), after: String(round) }, { field: 'price', before: null, after: String(salesPrice) }] }, st),
+    }
+  })
+
+  store.approveNegotiation = (quotationId, round) => setS((st) => {
+    const q = st.quotations.find((x) => x.id === quotationId)!
+    const negs = q.negotiations.map((n) => n.round === round ? { ...n, approvalStatus: 'approved' as const, approvedBy: me.id, approvedAt: nowStamp() } : n)
+    return {
+      ...st,
+      quotations: st.quotations.map((x) => (x.id === quotationId ? { ...x, negotiations: negs } : x)),
+      audit: audit({ action: 'update', table: 'tbl_t_negotiation', rowLabel: `${q.quotationNo} R${round}`, diff: [{ field: 'approval', before: 'pending', after: 'approved' }] }, st),
+    }
+  })
+
+  store.rejectNegotiation = (quotationId, round) => setS((st) => {
+    const q = st.quotations.find((x) => x.id === quotationId)!
+    const negs = q.negotiations.map((n) => n.round === round ? { ...n, approvalStatus: 'rejected' as const, approvedBy: me.id, approvedAt: nowStamp() } : n)
+    return {
+      ...st,
+      quotations: st.quotations.map((x) => (x.id === quotationId ? { ...x, negotiations: negs } : x)),
+      audit: audit({ action: 'update', table: 'tbl_t_negotiation', rowLabel: `${q.quotationNo} R${round}`, diff: [{ field: 'approval', before: 'pending', after: 'rejected' }] }, st),
+    }
+  })
+
+  store.customerRespondNegotiation = (quotationId, round, response) => setS((st) => {
+    const q = st.quotations.find((x) => x.id === quotationId)!
+    const negs = q.negotiations.map((n) => n.round === round ? { ...n, customerResponse: response, customerRespondedAt: nowStamp() } : n)
+    let status = q.status
+    if (response === 'ok') status = 'approved'
+    else if (round >= 2) status = 'expired'
+    return {
+      ...st,
+      quotations: st.quotations.map((x) => (x.id === quotationId ? { ...x, status, negotiations: negs } : x)),
+      audit: audit({ action: 'update', table: 'tbl_t_negotiation', rowLabel: `${q.quotationNo} R${round}`, diff: [{ field: 'customer_response', before: 'pending', after: response }] }, st),
+    }
+  })
+
+  store.addPO = (data) => {
+    const id = `po-x-${Date.now()}`
+    const poNo = `PO-2026-${String(s.purchaseOrders.length + 1).padStart(4, '0')}`
+    setS((st) => ({
+      ...st,
+      purchaseOrders: [...st.purchaseOrders, { ...data, id, poNo, createdBy: me.id, createdAt: nowStamp() }],
+      audit: audit({ action: 'insert', table: 'tbl_t_po', rowLabel: poNo, diff: [{ field: 'quotation_ref', before: null, after: data.quotationNo }, { field: 'total', before: null, after: String(data.totalAmount) }] }, st),
+    }))
+    return id
+  }
+
+  store.updatePO = (id, patch) => setS((st) => {
+    const p = st.purchaseOrders.find((x) => x.id === id)!
+    return { ...st, purchaseOrders: st.purchaseOrders.map((x) => (x.id === id ? { ...x, ...patch } : x)), audit: audit({ action: 'update', table: 'tbl_t_po', rowLabel: p.poNo, diff: diffOf(p, patch) }, st) }
+  })
+
+  store.addSO = (data) => {
+    const id = `so-x-${Date.now()}`
+    const soNo = `SO-2026-${String(s.salesOrders.length + 1).padStart(4, '0')}`
+    setS((st) => ({
+      ...st,
+      salesOrders: [...st.salesOrders, { ...data, id, soNo, createdBy: me.id, createdAt: nowStamp() }],
+      audit: audit({ action: 'insert', table: 'tbl_t_so', rowLabel: soNo, diff: [{ field: 'po_ref', before: null, after: data.poNo }, { field: 'total', before: null, after: String(data.totalAmount) }] }, st),
+    }))
+    return id
+  }
+
+  store.updateSO = (id, patch) => setS((st) => {
+    const so = st.salesOrders.find((x) => x.id === id)!
+    return { ...st, salesOrders: st.salesOrders.map((x) => (x.id === id ? { ...x, ...patch } : x)), audit: audit({ action: 'update', table: 'tbl_t_so', rowLabel: so.soNo, diff: diffOf(so, patch) }, st) }
+  })
+
+  store.addCommercialSheet = (data) => {
+    const id = `cs-x-${Date.now()}`
+    const csNo = `CS-2026-${String(s.commercialSheets.length + 1).padStart(4, '0')}`
+    setS((st) => ({
+      ...st,
+      commercialSheets: [...st.commercialSheets, { ...data, id, csNo, createdBy: me.id, createdAt: nowStamp() }],
+      audit: audit({ action: 'insert', table: 'tbl_t_commercial_sheet', rowLabel: csNo, diff: [{ field: 'so_ref', before: null, after: data.refSoNo }, { field: 'profit', before: null, after: String(data.profit) }] }, st),
+    }))
+    return id
+  }
+
+  store.updateCommercialSheet = (id, patch) => setS((st) => {
+    const cs = st.commercialSheets.find((x) => x.id === id)!
+    return { ...st, commercialSheets: st.commercialSheets.map((x) => (x.id === id ? { ...x, ...patch } : x)), audit: audit({ action: 'update', table: 'tbl_t_commercial_sheet', rowLabel: cs.csNo, diff: diffOf(cs, patch) }, st) }
+  })
+
+  store.deleteCommercialSheet = (id) => setS((st) => {
+    const cs = st.commercialSheets.find((x) => x.id === id)!
+    return { ...st, commercialSheets: st.commercialSheets.filter((x) => x.id !== id), audit: audit({ action: 'delete', table: 'tbl_t_commercial_sheet', rowLabel: cs.csNo, diff: [{ field: 'deleted', before: 'false', after: 'true' }] }, st) }
+  })
+
+  // ---------- Procurement ----------
+  store.addPurchaseRequest = (data) => {
+    const id = `pr-x-${Date.now()}`
+    const prNo = `PR-${TODAY.replace(/-/g, '').slice(0, 8)}-${String(s.purchaseRequests.length + 1).padStart(3, '0')}`
+    setS((st) => ({
+      ...st,
+      purchaseRequests: [...st.purchaseRequests, { ...data, id, prNo, createdBy: me.id, createdAt: nowStamp() }],
+      audit: audit({ action: 'insert', table: 'tbl_t_purchase_request', rowLabel: prNo, diff: [{ field: 'vessel', before: null, after: data.vesselTB }, { field: 'total', before: null, after: String(data.totalEstimatedAmount) }] }, st),
+    }))
+    return id
+  }
+
+  store.updatePurchaseRequest = (id, patch) => setS((st) => {
+    const pr = st.purchaseRequests.find((x) => x.id === id)!
+    return { ...st, purchaseRequests: st.purchaseRequests.map((x) => (x.id === id ? { ...x, ...patch } : x)), audit: audit({ action: 'update', table: 'tbl_t_purchase_request', rowLabel: pr.prNo, diff: diffOf(pr, patch) }, st) }
+  })
+
+  store.approvePR = (id) => setS((st) => {
+    const pr = st.purchaseRequests.find((x) => x.id === id)!
+    const steps: PurchaseRequest['status'][] = ['draft', 'pending_dept_head', 'pending_finance', 'pending_procurement', 'pending_management', 'approved']
+    const nextIdx = Math.min(pr.approvalStep + 1, steps.length - 1)
+    return {
+      ...st,
+      purchaseRequests: st.purchaseRequests.map((x) => (x.id === id ? { ...x, status: steps[nextIdx], approvalStep: nextIdx } : x)),
+      audit: audit({ action: 'update', table: 'tbl_t_purchase_request', rowLabel: pr.prNo, diff: [{ field: 'status', before: pr.status, after: steps[nextIdx] }] }, st),
+    }
+  })
+
+  store.rejectPR = (id) => setS((st) => {
+    const pr = st.purchaseRequests.find((x) => x.id === id)!
+    return {
+      ...st,
+      purchaseRequests: st.purchaseRequests.map((x) => (x.id === id ? { ...x, status: 'rejected' as const } : x)),
+      audit: audit({ action: 'update', table: 'tbl_t_purchase_request', rowLabel: pr.prNo, diff: [{ field: 'status', before: pr.status, after: 'rejected' }] }, st),
+    }
+  })
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

@@ -7,7 +7,7 @@ export type DocStatus = 'valid' | 'soon' | 'expired'
 export type FollowUp = 'pending' | 'in_progress' | 'done'
 export type CrewStatus = 'on_duty' | 'leave' | 'standby' | 'inactive'
 export type Employment = 'permanent' | 'contract'
-export type RoleId = 'superadmin' | 'sales_admin' | 'ops_crewing' | 'ops_asset' | 'ops_bunker' | 'ops_traffic' | 'ops_repair' | 'ops_keagenan' | 'procurement' | 'finance'
+export type RoleId = 'superadmin' | 'sales' | 'ops_crewing' | 'ops_asset' | 'ops_bunker' | 'ops_traffic' | 'ops_repair' | 'ops_keagenan' | 'procurement' | 'finance'
 
 export interface Vessel {
   id: string
@@ -236,6 +236,247 @@ export interface AuditEntry {
   table: string
   rowLabel: string
   diff: AuditDiff[]
+}
+
+// ---------- Sales ----------
+export type NegotiationStatus = 'draft' | 'waiting_approval' | 'approved' | 'sent_to_customer' | 'customer_ok' | 'customer_reject' | 'revision' | 'expired'
+export type QuotationStatus = 'draft' | 'negotiation' | 'approved' | 'rejected' | 'expired'
+export type POStatus = 'draft' | 'confirmed' | 'completed' | 'cancelled'
+export type SOStatus = 'draft' | 'active' | 'completed' | 'cancelled'
+
+export interface RFQ {
+  id: string
+  rfqNo: string
+  customerName: string
+  customerContact: string
+  origin: string
+  destination: string
+  cargoType: string
+  cargoTonnage: number
+  requestDate: string
+  validUntil: string
+  notes: string
+  files: RFQFileRef[]
+  createdBy: string
+  createdAt: string
+}
+
+export interface QuotationItem {
+  description: string
+  unit: string
+  qty: number
+  unitPrice: number
+  amount: number
+}
+
+export interface NegotiationRound {
+  round: number
+  salesPrice: number
+  submittedAt: string
+  approvalStatus: 'pending' | 'approved' | 'rejected'
+  approvedBy: string | null
+  approvedAt: string | null
+  customerResponse: 'pending' | 'ok' | 'reject' | null
+  customerRespondedAt: string | null
+}
+
+export interface Quotation {
+  id: string
+  quotationNo: string
+  rfqId: string
+  customerName: string
+  origin: string
+  destination: string
+  cargoType: string
+  cargoTonnage: number
+  items: QuotationItem[]
+  totalAmount: number
+  validUntil: string
+  status: QuotationStatus
+  negotiations: NegotiationRound[]
+  currentRound: number
+  createdBy: string
+  createdAt: string
+}
+
+export interface PurchaseOrder {
+  id: string
+  poNo: string
+  quotationId: string
+  quotationNo: string
+  customerName: string
+  customerContact: string
+  origin: string
+  destination: string
+  cargoType: string
+  cargoTonnage: number
+  totalAmount: number
+  poDate: string
+  deliveryDate: string
+  paymentTerms: string
+  shipmentType: string
+  portOfLoading: string
+  portOfDischarge: string
+  specialInstructions: string
+  status: POStatus
+  notes: string
+  createdBy: string
+  createdAt: string
+}
+
+export interface SalesOrder {
+  id: string
+  soNo: string
+  poId: string
+  poNo: string
+  customerName: string
+  salesName: string
+  shipmentType: string
+  laycanStart: string
+  laycanEnd: string
+  portOfLoading: string
+  portOfDischarge: string
+  freeTime: number
+  freeTimeUnit: string
+  cargoType: string
+  cargoWeight: number
+  cargoWeightUnit: string
+  dwt: number
+  dwtUnit: string
+  freightPrice: number
+  freightCurrency: string
+  freightBasis: string
+  paymentTerms: string
+  customerPic: string
+  customerPicPhone: string
+  customerPicEmail: string
+  customerPicPosition: string
+  remarks: string
+  origin: string
+  destination: string
+  totalAmount: number
+  soDate: string
+  status: SOStatus
+  vesselAssigned: string | null
+  createdBy: string
+  createdAt: string
+}
+
+export interface CommercialSheet {
+  id: string
+  csNo: string
+  refSoId: string
+  refSoNo: string
+  voyageNo: string
+  vesselTB: string
+  barge: string
+  cargoType: string
+  cargoWeight: number
+  origin: string
+  destination: string
+  riverDistance: number
+  seaDistance: number
+  totalDistance: number
+  laycanStart: string
+  laycanEnd: string
+  mainEnginePower: number
+  mainEngineConsumption: number
+  particularEngineConsumption: number
+  totalConsumption: number
+  seaSpeedLoaded: number
+  seaSpeedBallast: number
+  riverSpeedLoaded: number
+  riverSpeedBallast: number
+  fuelPricePerLiter: number
+  contingencyPercent: number
+  operatingCosts: { description: string; unit: string; qty: number; rate: number; amount: number; remarks: string }[]
+  totalOperatingCost: number
+  revenueRate: number
+  totalRevenue: number
+  profit: number
+  profitPercent: number
+  notes: string
+  createdBy: string
+  createdAt: string
+}
+
+export type RFQFileRef = { id: string; name: string; sizeKb: number; uploadedAt: string }
+
+// ---------- Procurement ----------
+export type PRStatus = 'draft' | 'pending_dept_head' | 'pending_finance' | 'pending_procurement' | 'pending_management' | 'approved' | 'rejected'
+export type PRPriority = 'Normal' | 'Urgent' | 'Critical'
+
+export interface BunkerRequestItem {
+  fuelType: string
+  quantity: number
+  estPrice: number
+  estimatedAmount: number
+  remarks: string
+}
+
+export interface PurchaseRequest {
+  id: string
+  prNo: string
+  prDate: string
+  requestBy: string
+  department: string
+  priority: PRPriority
+  requiredDate: string
+  status: PRStatus
+  // Reference
+  jobOrderNo: string
+  salesOrderNo: string
+  commercialSheetNo: string
+  voyageNo: string
+  contractCustomer: string
+  // Vessel & position
+  vesselTB: string
+  barge: string
+  currentLocation: string
+  vesselType: string
+  mainEnginePower: number
+  mainEngineConsumption: number
+  particularEngineConsumption: number
+  totalConsumption: number
+  // Fuel status
+  measurementDateTime: string
+  currentROB: number
+  fuelTankCapacity: number
+  availableCapacity: number
+  // Bunker port & route
+  bunkerPort: string
+  distanceToBunkerPort: number
+  estimatedSpeed: number
+  estimatedSailingHours: number
+  mainEngineConsRoute: number
+  particularEngineConsRoute: number
+  estimatedFuelConsumption: number
+  // ROB at bunker port
+  estConsumptionToBunkerPort: number
+  estimatedROBAtArrival: number
+  // Bunker requirement
+  targetROBAfterBunkering: number
+  requiredBunkerQuantity: number
+  // Bunker request detail
+  bunkerItems: BunkerRequestItem[]
+  totalEstimatedAmount: number
+  // Supplier
+  preferredSupplier: string
+  supplierContact: string
+  supplierPhone: string
+  supplierEmail: string
+  // Delivery
+  deliveryMethod: string
+  deliveryLocation: string
+  estimatedDeliveryDate: string
+  estimatedDeliveryTime: string
+  picAtLocation: string
+  picPhone: string
+  // Misc
+  remarks: string
+  approvalStep: number
+  createdBy: string
+  createdAt: string
 }
 
 export interface LoginAttempt {
