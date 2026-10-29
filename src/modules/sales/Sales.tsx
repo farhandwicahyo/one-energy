@@ -598,7 +598,6 @@ function SOPage() {
 }
 
 // ---------- Commercial Sheet (CRUD + auto-calc — matching screenshot layout) ----------
-const T = 'text-[12px]'
 const th = 'px-2 py-1.5 text-left font-bold text-[12px] bg-accent/10'
 const thR = 'px-2 py-1.5 text-right font-bold text-[12px] bg-accent/10'
 const td_ = 'px-2 py-1 text-[12px]'

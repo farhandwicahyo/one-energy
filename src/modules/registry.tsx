@@ -26,8 +26,6 @@ export interface ModuleDef {
   features: Feature[]
 }
 
-const notReady = (st: Store) => [...st.assessments.values()].filter((a) => a.status === 'red').length
-
 export const MODULES: ModuleDef[] = [
   {
     code: 'SALES', slug: 'sales', name: 'Sales', icon: Handshake,

@@ -4,7 +4,7 @@ import { config as seedConfig, docTypeById, docTypes as seedDocTypes, escalation
 import { seed } from './data/seed'
 import { commercialSheets as seedCS, purchaseOrders as seedPOs, quotations as seedQuotations, rfqs as seedRFQs, salesOrders as seedSOs } from './data/sales-seed'
 import { purchaseRequests as seedPRs } from './data/procurement-seed'
-import type { AuditDiff, AuditEntry, CommercialSheet, Crew, CrewPrivate, Doc, DocType, FollowUp, NegotiationRound, OpStatus, PurchaseOrder, PurchaseRequest, Quotation, QuotationItem, Rank, RFQ, Readiness, RoleId, SalesOrder, Vessel, VesselAsset } from './data/types'
+import type { AuditDiff, AuditEntry, CommercialSheet, Crew, CrewPrivate, Doc, DocType, FollowUp, NegotiationRound, OpStatus, PurchaseOrder, PurchaseRequest, Quotation, Rank, RFQ, Readiness, RoleId, SalesOrder, Vessel, VesselAsset } from './data/types'
 import { addDays, nowStamp, TODAY } from './lib/dates'
 import { assessVessel, buildIndex, docStatus, worst, type Assessment } from './lib/rules'
 
@@ -168,7 +168,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const ownerName = useCallback((d: Pick<Doc, 'ownerKind' | 'ownerId'>) =>
     d.ownerKind === 'vessel' ? vesselMap.get(d.ownerId)?.name ?? '—' : crewMap.get(d.ownerId)?.name ?? '—', [vesselMap, crewMap])
 
-  const store: Store = {
+  const store = {
     s, me, setMe, signedIn, signIn, signOut,
     can: (p) => me.roles.includes('superadmin' as any) || perms.has(p),
     hasRole: (r) => me.roles.includes(r),
@@ -521,7 +521,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
       })
     },
-  }
+  } as Store
 
   // ---------- Sales ----------
   store.addRFQ = (data) => {

@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Check, ChevronDown, ClipboardList, FileCheck2, FileStack, Fuel, Inbox, LayoutDashboard,
-  MapPin, Plus, RefreshCw, Search, ShoppingCart, Trash2, Truck, Upload, UserCog, Users, X as XIcon,
+  ArrowLeft, Check, ChevronDown, FileCheck2, FileStack, Inbox, LayoutDashboard,
+  Plus, RefreshCw, Search, ShoppingCart, Trash2, Truck, Upload, UserCog, Users, X as XIcon,
 } from 'lucide-react'
 import { useStore } from '../../store'
 import {
@@ -476,7 +476,7 @@ function PRDetailPage({ id }: { id: string }) {
 
 // ---------- PR Create (matches screenshot exactly) ----------
 function PRCreatePage() {
-  const { s, addPurchaseRequest } = useStore()
+  const { addPurchaseRequest } = useStore()
   const nav = useNavigate()
 
   const [f, setF] = useState({
