@@ -73,7 +73,7 @@ export const compositionRules: CompositionRule[] = [
 
 export const users: User[] = [
   { id: 'u-hendra', name: 'Hendra Wijaya', username: 'hendra.w', email: 'hendra.w@oneenergy.co.id', phone: '+62 811-5009-3381', roles: ['superadmin'], active: true, lastLogin: '2026-10-21T07:58' },
-  { id: 'u-rina', name: 'Rina Wulandari', username: 'rina.w', email: 'rina.w@oneenergy.co.id', phone: '+62 812-4410-2231', roles: ['sales_admin'], active: true, lastLogin: '2026-10-21T08:12' },
+  { id: 'u-rina', name: 'Rina Wulandari', username: 'rina.w', email: 'rina.w@oneenergy.co.id', phone: '+62 812-4410-2231', roles: ['sales'], active: true, lastLogin: '2026-10-21T08:12' },
   { id: 'u-sari', name: 'Sari Handayani', username: 'sari.h', email: 'sari.h@oneenergy.co.id', phone: '+62 811-2034-7765', roles: ['ops_crewing'], active: true, lastLogin: '2026-10-21T08:03' },
   { id: 'u-maya', name: 'Maya Kusuma', username: 'maya.k', email: 'maya.k@oneenergy.co.id', phone: '+62 813-3320-8876', roles: ['ops_asset'], active: true, lastLogin: '2026-10-21T08:03' },
   { id: 'u-budi', name: 'Budi Santoso', username: 'budi.s', email: 'budi.s@oneenergy.co.id', phone: '+62 812-9087-1123', roles: ['ops_bunker'], active: true, lastLogin: '2026-10-21T06:41' },
@@ -89,7 +89,7 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
     { code: 'sales.read', label: 'View sales data' },
     { code: 'sales.write', label: 'Create and edit sales' },
   ] },
-  { group: 'Documents Asset TB & BG', items: [
+  { group: 'Operational · Doc Asset TB & BG', items: [
     { code: 'vessel.read', label: 'View vessels' },
     { code: 'vessel.write', label: 'Create and edit vessels' },
     { code: 'vessel.status_change', label: 'Change vessel status' },
@@ -101,7 +101,7 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
     { code: 'document_crew.write', label: 'Write crew documents' },
     { code: 'followup.write', label: 'Update follow-up status' },
   ] },
-  { group: 'Crewing', items: [
+  { group: 'Operational · Crewing', items: [
     { code: 'crew.read', label: 'View crew' },
     { code: 'crew.write', label: 'Create and edit crew' },
     { code: 'crew_private.read', label: 'View personal data', sensitive: true },
@@ -109,35 +109,31 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
     { code: 'assignment.write', label: 'Sign on / sign off' },
     { code: 'composition.manage', label: 'Manage minimum composition' },
   ] },
-  { group: 'Bunker', items: [
+  { group: 'Operational · Bunker', items: [
     { code: 'bunker.read', label: 'View bunker data' },
     { code: 'bunker.write', label: 'Manage bunker operations' },
   ] },
-  { group: 'Traffic', items: [
+  { group: 'Operational · Traffic', items: [
     { code: 'traffic.read', label: 'View traffic data' },
     { code: 'traffic.write', label: 'Manage vessel traffic' },
   ] },
-  { group: 'Port Agency (Keagenan)', items: [
+  { group: 'Operational · Port Agency', items: [
     { code: 'keagenan.read', label: 'View port agency data' },
     { code: 'keagenan.write', label: 'Manage port agency' },
   ] },
-  { group: 'Maintenance & Repair', items: [
+  { group: 'Operational · Maintenance & Repair', items: [
     { code: 'maintenance.read', label: 'View maintenance data' },
     { code: 'maintenance.write', label: 'Manage maintenance' },
   ] },
   { group: 'Procurement', items: [
     { code: 'procurement.read', label: 'View procurement data' },
     { code: 'procurement.write', label: 'Manage procurement' },
-  ] },
-  { group: 'Document Support', items: [
     { code: 'doc_support.read', label: 'View document support' },
     { code: 'doc_support.write', label: 'Manage document support' },
   ] },
-  { group: 'Billing', items: [
+  { group: 'Finance', items: [
     { code: 'billing.read', label: 'View billing data' },
     { code: 'billing.write', label: 'Manage billing' },
-  ] },
-  { group: 'Payment', items: [
     { code: 'payment.read', label: 'View payment data' },
     { code: 'payment.write', label: 'Manage payments' },
   ] },
@@ -159,14 +155,14 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
 
 export const roles: Role[] = [
   { id: 'superadmin', name: 'Super Admin', description: 'Full access to all modules and features across the entire system.', permissions: permissionCatalog.flatMap((g) => g.items.map((i) => i.code)).concat(['user.manage', 'role.manage', 'audit.read', 'config.manage', 'master.manage']) },
-  { id: 'sales_admin', name: 'Sales Admin', description: 'Manages the commercial process from RFQ to Sales Order.', permissions: ['sales.read', 'sales.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_crewing', name: 'Operational Crewing', description: 'Manages crew, assignments, certificates and contracts.', permissions: ['crew.read', 'crew.write', 'crew_private.read', 'contract.read', 'assignment.write', 'composition.manage', 'vessel.read', 'document.read', 'document_crew.write', 'readiness.read', 'dashboard.tasks'] },
-  { id: 'ops_asset', name: 'Operational Asset', description: 'Manages vessel data, documents, assets, certificates and regulatory compliance for TB & BG.', permissions: ['vessel.read', 'vessel.write', 'vessel.status_change', 'vessel.pair_manage', 'asset.read', 'asset.write', 'document.read', 'document_vessel.write', 'document_crew.write', 'followup.write', 'crew.read', 'readiness.read', 'dashboard.tasks'] },
-  { id: 'ops_bunker', name: 'Operational Bunker', description: 'Manages vessel fuel planning, delivery and stock monitoring.', permissions: ['bunker.read', 'bunker.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_traffic', name: 'Operational Traffic', description: 'Monitors vessel movements, tracking and daily reporting.', permissions: ['traffic.read', 'traffic.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_repair', name: 'Operational Repair', description: 'Plans and records vessel maintenance and repairs.', permissions: ['maintenance.read', 'maintenance.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_keagenan', name: 'Operational Keagenan', description: 'Handles port agency, clearance, logistics and vessel supply.', permissions: ['keagenan.read', 'keagenan.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'procurement', name: 'Procurement', description: 'Manages purchasing, vendors, delivery, bunker procurement, maintenance procurement and document support.', permissions: ['procurement.read', 'procurement.write', 'bunker.read', 'maintenance.read', 'doc_support.read', 'doc_support.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'sales', name: 'Sales', description: 'Manages the commercial process from RFQ to Sales Order.', permissions: ['sales.read', 'sales.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_crewing', name: 'Operational Crewing', description: 'Operational module: Crewing only (crew, assignments, manning, contracts).', permissions: ['crew.read', 'crew.write', 'crew_private.read', 'contract.read', 'assignment.write', 'composition.manage', 'vessel.read', 'document.read', 'document_crew.write', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'ops_asset', name: 'Operational Doc Asset', description: 'Operational module: Documents Asset TB & BG (vessels, pairs, certificates, regulatory compliance).', permissions: ['vessel.read', 'vessel.write', 'vessel.status_change', 'vessel.pair_manage', 'asset.read', 'asset.write', 'document.read', 'document_vessel.write', 'document_crew.write', 'followup.write', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'ops_bunker', name: 'Operational Bunker', description: 'Operational module: Bunker only (fuel planning, delivery, consumption, stock).', permissions: ['bunker.read', 'bunker.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_traffic', name: 'Operational Traffic', description: 'Operational module: Traffic only (voyage planning, tracking, reporting).', permissions: ['traffic.read', 'traffic.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_repair', name: 'Operational Maintenance & Repair', description: 'Operational module: Maintenance & Repair only.', permissions: ['maintenance.read', 'maintenance.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_keagenan', name: 'Operational Port Agency', description: 'Operational module: Port Agency & Logistics only.', permissions: ['keagenan.read', 'keagenan.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'procurement', name: 'Procurement', description: 'Manages purchasing, vendors, delivery and document support.', permissions: ['procurement.read', 'procurement.write', 'doc_support.read', 'doc_support.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
   { id: 'finance', name: 'Finance', description: 'Manages billing to customer and payment to vendor, including invoicing, 3-way matching and accounts.', permissions: ['billing.read', 'billing.write', 'payment.read', 'payment.write', 'sales.read', 'procurement.read', 'readiness.read', 'dashboard.tasks'] },
 ]
 

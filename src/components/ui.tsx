@@ -92,6 +92,7 @@ export function Stat({ label, value, sub, t, to }: { label: string; value: React
       <div className="text-[15px] font-bold text-ink-2">{label}</div>
       <div className={cx('tnum mt-1 font-display text-[3.25rem] font-extrabold leading-none', t === 'ok' && 'text-ok', t === 'warn' && 'text-warn', t === 'bad' && 'text-bad', !t && 'text-ink')}>{value}</div>
       {sub && <div className="mt-2 text-sm text-ink-2">{sub}</div>}
+      {to && <div className="mt-2 text-xs font-semibold text-accent">Click for detail</div>}
     </>
   )
   const cls = 'block rounded border border-line bg-surface p-5'
@@ -267,14 +268,13 @@ export function Table<T>({ rows, cols, rowKey, onRow, empty }: { rows: T[]; cols
   const paged = usePaged(rows)
   if (!rows.length) return empty ? <Empty title={empty} /> : <Empty notFound title="Nothing matches your search or filters">Clear the search or change a filter to see more.</Empty>
   const visible = paged.items
-  const title = cols.find((c) => c.mobile === 'title') ?? cols[0]
   return (
     <div>
-      <div className="hidden overflow-x-auto rounded border-2 border-ink bg-surface md:block">
+      <div className="overflow-x-auto rounded border-2 border-ink bg-surface">
         <table className="w-full text-left text-[15px]">
           <thead>
             <tr className="border-b-2 border-ink bg-surface-2 text-sm font-bold text-ink">
-              {cols.map((c) => <th key={c.key} scope="col" className={cx('px-4 py-2.5 font-medium', c.className)}>{c.header}</th>)}
+              {cols.map((c) => <th key={c.key} scope="col" className={cx('whitespace-nowrap px-4 py-2.5 font-medium', c.className)}>{c.header}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -284,32 +284,19 @@ export function Table<T>({ rows, cols, rowKey, onRow, empty }: { rows: T[]; cols
                 onClick={onRow ? () => onRow(r) : undefined}
                 className={cx('border-t border-line align-middle first:border-t-0', onRow && 'cursor-pointer hover:bg-accent-soft')}
               >
-                {cols.map((c) => <td key={c.key} className={cx('px-4 py-3', c.className)}>{c.cell(r)}</td>)}
+                {cols.map((c) => <td key={c.key} className={cx('whitespace-nowrap px-4 py-3', c.className)}>{c.cell(r)}</td>)}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <ul className="space-y-2 md:hidden">
-        {visible.map((r) => (
-          <li key={rowKey(r)}>
-            <div role={onRow ? 'button' : undefined} tabIndex={onRow ? 0 : undefined} onClick={onRow ? () => onRow(r) : undefined} className="rounded border-2 border-ink bg-surface p-4 active:bg-accent-soft">
-              <div className="font-medium text-ink">{title.cell(r)}</div>
-              <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                {cols.filter((c) => c !== title && c.mobile !== 'hide').map((c) => (
-                  <div key={c.key} className="min-w-0">
-                    <dt className="text-xs text-ink-2">{c.header}</dt>
-                    <dd className="mt-0.5 truncate">{c.cell(r)}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </li>
-        ))}
-      </ul>
       <Pager p={paged as ReturnType<typeof usePaged<unknown>>} />
     </div>
   )
+}
+
+export function ModuleFooter() {
+  return <footer className="mt-10 border-t border-line pt-6 text-center text-sm text-ink-2">OneEnergy · Fleet Management System</footer>
 }
 
 // ---------- Modal ----------

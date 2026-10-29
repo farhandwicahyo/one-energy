@@ -40,13 +40,13 @@ export const followUpLabel: Record<FollowUp, string> = {
 
 export const roleLabel: Record<RoleId, string> = {
   superadmin: 'Super Admin',
-  sales_admin: 'Sales Admin',
+  sales: 'Sales',
   ops_crewing: 'Operational Crewing',
-  ops_asset: 'Operational Asset',
+  ops_asset: 'Operational Doc Asset',
   ops_bunker: 'Operational Bunker',
   ops_traffic: 'Operational Traffic',
-  ops_repair: 'Operational Repair',
-  ops_keagenan: 'Operational Keagenan',
+  ops_repair: 'Operational Maintenance & Repair',
+  ops_keagenan: 'Operational Port Agency',
   procurement: 'Procurement',
   finance: 'Finance',
 }

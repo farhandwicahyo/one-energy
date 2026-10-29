@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { BookOpen, ChevronRight, LogOut, Search, ShieldCheck, UserRound } from 'lucide-react'
+import { BookOpen, ChevronRight, LogOut, Menu, Search, ShieldCheck, UserRound } from 'lucide-react'
 import { useStore } from '../store'
 import { roleLabel } from '../i18n/en'
 import { allowed, locate, moduleHref, MODULES, visibleFeatures } from '../modules/registry'
@@ -146,6 +146,7 @@ function Breadcrumb() {
   const here = locate(pathname)
   if (!here) return null
   const { module: m, feature: f } = here
+  if (pathname.startsWith('/sales/') || pathname.startsWith('/procurement/') || pathname.startsWith('/operations/') || pathname.startsWith('/finance/')) return null
   const deeper = f && pathname !== f.to
   // A single-feature module is the feature, so the trail stops at the module.
   if (m.features.length === 1) {
@@ -177,34 +178,48 @@ export function Shell() {
   const [phoneSearch, setPhoneSearch] = useState(false)
   useEffect(() => setPhoneSearch(false), [loc.pathname])
   const { signedIn } = useStore()
+  const isModule = loc.pathname.startsWith('/sales/') || loc.pathname.startsWith('/procurement/') || loc.pathname.startsWith('/operations/') || loc.pathname.startsWith('/finance/')
+  useEffect(() => {
+    if (!isModule) return
+    const html = document.documentElement
+    const prev = [html.style.overflow, document.body.style.overflow]
+    html.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    return () => { html.style.overflow = prev[0]; document.body.style.overflow = prev[1] }
+  }, [isModule])
   // Every page needs a session; without one, go to the login page and come back here afterwards.
   if (!signedIn) return <Navigate to="/login" replace state={{ from: loc.pathname + loc.search }} />
   return (
-    <div className="flex min-h-full flex-col">
-      <header className="kepala sticky top-0 z-30">
-        <div className="mx-auto flex min-h-[72px] max-w-[1400px] items-center justify-between gap-4 px-4 py-2 md:px-8">
-          <Link to="/" className="merek shrink-0" aria-label="Harum Energy, to all modules">
-            <img src="/logo.svg" alt="Harum Energy" width={163} height={32} />
-          </Link>
+    <div className={cx('flex flex-col', isModule ? 'h-dvh overflow-hidden' : 'min-h-full')}>
+      <header className="kepala sticky top-0 z-30 shrink-0">
+        <div className={cx('flex min-h-[72px] items-center justify-between gap-4 py-2 pr-4 md:pr-8', isModule ? 'pl-0' : 'pl-4 md:pl-8')}>
+          <div className="flex items-center">
+            {isModule && <div className="flex w-16 shrink-0 justify-center"><button onClick={() => window.dispatchEvent(new Event('toggle-module-sidebar'))} className="grid size-10 place-items-center rounded-lg border-2 border-surface/60 text-surface" aria-label="Toggle menu"><Menu className="size-5" /></button></div>}
+            <div className={cx(isModule && 'hidden lg:block')}>
+              <Link to="/" className="merek shrink-0" aria-label="Harum Energy, to all modules">
+                <img src="/logo.svg" alt="Harum Energy" width={163} height={32} />
+              </Link>
+            </div>
+          </div>
           <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-            <GlobalSearch className="hidden w-full max-w-sm md:block" />
-            <button onClick={() => setPhoneSearch((x) => !x)} className="grid size-11 place-items-center rounded border-2 border-surface/60 md:hidden" aria-label="Search" aria-expanded={phoneSearch}><Search className="size-5" /></button>
+            {!isModule && <GlobalSearch className="hidden w-full max-w-sm md:block" />}
+            {!isModule && <button onClick={() => setPhoneSearch((x) => !x)} className="grid size-11 place-items-center rounded border-2 border-surface/60 md:hidden" aria-label="Search" aria-expanded={phoneSearch}><Search className="size-5" /></button>}
             <AccountMenu />
           </div>
         </div>
         {phoneSearch && <div className="px-4 pb-3 md:hidden"><GlobalSearch autoFocus onDone={() => setPhoneSearch(false)} /></div>}
       </header>
-      <main className="flex-1">
-        {landing ? <Outlet /> : (
+      <main className={cx('flex-1', isModule && 'flex min-h-0')}>
+        {landing ? <Outlet /> : isModule ? <Outlet /> : (
           <div className="mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-8">
             <Breadcrumb />
             <Outlet />
           </div>
         )}
       </main>
-      <footer className="bg-surface-2 px-4 py-6 text-center text-sm text-ink-2">
-        OneEnergy · Fleet Management System · Phase 1 demo data, today is 21 Oct 2026 (WIB)
-      </footer>
+      {!isModule && <footer className="bg-surface-2 px-4 py-6 text-center text-sm text-ink-2">
+        OneEnergy · Fleet Management System
+      </footer>}
     </div>
   )
 }
