@@ -1,5 +1,6 @@
 import { addDays, TODAY } from '../lib/dates'
-import type { CommercialSheet, NegotiationRound, PurchaseOrder, Quotation, QuotationItem, RFQ, RFQFileRef, SalesOrder } from './types'
+import { buildBillings } from '../lib/billing'
+import type { CommercialSheet, NegotiationRound, Quotation, QuotationItem, SalesOrder } from './types'
 
 function mulberry32(seed: number) {
   return () => {
@@ -21,7 +22,6 @@ const CUSTOMERS = [
   'PT Kaltim Prima Coal', 'PT Indominco Mandiri', 'PT Arutmin Indonesia', 'PT Multi Harapan Utama',
   'PT Trubaindo Coal Mining', 'PT Bharinto Ekatama',
 ]
-const CONTACTS = ['Pak Agus', 'Bu Sari', 'Pak Rudi', 'Bu Rina', 'Pak Bambang', 'Bu Dewi', 'Pak Hasan', 'Bu Lina', 'Pak Eko', 'Bu Maya']
 const PIC_NAMES = ['Budi Santoso', 'Andi Pratama', 'Rina Kartika', 'Dewi Lestari', 'Agus Setiawan', 'Maya Sari', 'Hendra Wijaya', 'Sari Rahayu']
 const PIC_POSITIONS = ['Logistics Manager', 'Procurement Head', 'Shipping Coordinator', 'Operations Manager', 'Supply Chain Manager']
 const ORIGINS = ['Samarinda', 'Balikpapan', 'Banjarmasin', 'Muara Berau', 'Sangatta']
@@ -40,40 +40,20 @@ const SALES_NAMES = ['Rina Wulandari', 'Andi Pratama', 'Hendra Wijaya']
 const VESSELS_TB = ['TB Taboneo', 'TB Mahakam', 'TB Barito', 'TB Kapuas', 'TB Perkasa']
 const BARGES = ['BG-001', 'BG-002', 'BG-003', 'BG-004', 'BG-005']
 
-// ---------- RFQ ----------
-export const rfqs: RFQ[] = []
-for (let i = 1; i <= 12; i++) {
-  const dayOffset = -int(1, 45)
-  const files: RFQFileRef[] = i <= 8
-    ? [{ id: `rfq-file-${i}`, name: `RFQ-${pad(i)}-document.pdf`, sizeKb: int(200, 1500), uploadedAt: addDays(TODAY, dayOffset) + 'T08:30' }]
-    : []
-  if (i <= 4) files.push({ id: `rfq-file-${i}-2`, name: `RFQ-${pad(i)}-appendix.pdf`, sizeKb: int(100, 800), uploadedAt: addDays(TODAY, dayOffset) + 'T09:00' })
-  rfqs.push({
-    id: `rfq-${pad(i)}`,
-    rfqNo: `RFQ-2026-${pad(i)}`,
-    customerName: pick(CUSTOMERS),
-    customerContact: pick(CONTACTS),
-    origin: pick(ORIGINS),
-    destination: pick(DESTINATIONS),
-    cargoType: pick(CARGO),
-    cargoTonnage: int(3, 15) * 1000,
-    requestDate: addDays(TODAY, dayOffset),
-    validUntil: addDays(TODAY, dayOffset + 30),
-    notes: i <= 3 ? 'Urgent delivery requested' : '',
-    files,
-    createdBy: 'u-rina',
-    createdAt: addDays(TODAY, dayOffset) + 'T08:00',
-  })
-}
-
 // ---------- Quotation ----------
 export const quotations: Quotation[] = []
 for (let i = 1; i <= 8; i++) {
-  const rfq = rfqs[i - 1]
+  const dayOffset = -int(1, 45)
+  const requestDate = addDays(TODAY, dayOffset)
+  const customerName = pick(CUSTOMERS)
+  const cargoType = pick(CARGO)
+  const cargoTonnage = int(3, 15) * 1000
+  const origin = pick(ORIGINS)
+  const destination = pick(DESTINATIONS)
   const freightRate = int(80, 150) * 1000
-  const totalFreight = freightRate * rfq.cargoTonnage
+  const totalFreight = freightRate * cargoTonnage
   const items: QuotationItem[] = [
-    { description: 'Freight charge', unit: 'MT', qty: rfq.cargoTonnage, unitPrice: freightRate, amount: totalFreight },
+    { description: 'Freight charge', unit: 'MT', qty: cargoTonnage, unitPrice: freightRate, amount: totalFreight },
     { description: 'Loading supervision', unit: 'Lumpsum', qty: 1, unitPrice: int(15, 30) * 1000000, amount: int(15, 30) * 1000000 },
     { description: 'Insurance surcharge', unit: '%', qty: 1, unitPrice: Math.round(totalFreight * 0.005), amount: Math.round(totalFreight * 0.005) },
   ]
@@ -87,12 +67,12 @@ for (let i = 1; i <= 8; i++) {
     negotiations.push({
       round: 1,
       salesPrice: totalAmount,
-      submittedAt: addDays(rfq.requestDate, 2) + 'T10:00',
+      submittedAt: addDays(requestDate, 2) + 'T10:00',
       approvalStatus: 'approved',
       approvedBy: 'u-hendra',
-      approvedAt: addDays(rfq.requestDate, 2) + 'T14:00',
+      approvedAt: addDays(requestDate, 2) + 'T14:00',
       customerResponse: i <= 4 ? 'ok' : 'reject',
-      customerRespondedAt: addDays(rfq.requestDate, 5) + 'T09:00',
+      customerRespondedAt: addDays(requestDate, 5) + 'T09:00',
     })
     currentRound = 1
 
@@ -103,12 +83,12 @@ for (let i = 1; i <= 8; i++) {
       negotiations.push({
         round: 2,
         salesPrice: revisedAmount,
-        submittedAt: addDays(rfq.requestDate, 7) + 'T10:00',
+        submittedAt: addDays(requestDate, 7) + 'T10:00',
         approvalStatus: 'approved',
         approvedBy: 'u-hendra',
-        approvedAt: addDays(rfq.requestDate, 7) + 'T15:00',
+        approvedAt: addDays(requestDate, 7) + 'T15:00',
         customerResponse: i === 5 ? 'ok' : 'reject',
-        customerRespondedAt: addDays(rfq.requestDate, 10) + 'T09:00',
+        customerRespondedAt: addDays(requestDate, 10) + 'T09:00',
       })
       currentRound = 2
       status = i === 5 ? 'approved' : 'expired'
@@ -118,7 +98,7 @@ for (let i = 1; i <= 8; i++) {
     negotiations.push({
       round: 1,
       salesPrice: totalAmount,
-      submittedAt: addDays(rfq.requestDate, 2) + 'T10:00',
+      submittedAt: addDays(requestDate, 2) + 'T10:00',
       approvalStatus: 'pending',
       approvedBy: null,
       approvedAt: null,
@@ -131,75 +111,63 @@ for (let i = 1; i <= 8; i++) {
   quotations.push({
     id: `quo-${pad(i)}`,
     quotationNo: `QUO-2026-${pad(i)}`,
-    rfqId: rfq.id,
-    customerName: rfq.customerName,
-    origin: rfq.origin,
-    destination: rfq.destination,
-    cargoType: rfq.cargoType,
-    cargoTonnage: rfq.cargoTonnage,
+    customerAddress: 'Jl. Jenderal Sudirman No. 1, Jakarta',
+    customerPic: i <= 3 ? 'Agus Prasetyo' : pick(PIC_NAMES),
+    customerPicPosition: pick(PIC_POSITIONS),
+    customerPicPhone: i <= 3 ? '+62 812-5500-1200' : `0812 ${int(1000, 9999)} ${int(1000, 9999)}`,
+    customerPicEmail: i <= 3 ? 'agus.p@customer.co.id' : `pic${i}@${customerName.toLowerCase().replace(/pt /g, '').replace(/ /g, '').slice(0, 10)}.co.id`,
+    customerName,
+    customerId: `01.${int(100, 999)}.${int(100, 999)}.${int(1, 9)}-${int(100, 999)}.000`,
+    consigneeName: customerName,
+    shipperName: customerName,
+    shipmentType: pick(SHIPMENT_TYPES),
+    origin,
+    destination,
+    portOfLoading: origin,
+    portOfDischarge: destination,
+    cargoType,
+    cargoTonnage,
+    laycanStart: addDays(requestDate, 10),
+    laycanEnd: addDays(requestDate, 20),
     items,
     totalAmount,
     validUntil: addDays(TODAY, 14),
     status,
     negotiations,
     currentRound,
-    createdBy: 'u-rina',
-    createdAt: addDays(rfq.requestDate, 1) + 'T09:00',
-  })
-}
-
-// ---------- Purchase Orders ----------
-export const purchaseOrders: PurchaseOrder[] = []
-const approvedQuotations = quotations.filter((q) => q.status === 'approved')
-for (let i = 0; i < approvedQuotations.length; i++) {
-  const q = approvedQuotations[i]
-  purchaseOrders.push({
-    id: `po-${pad(i + 1)}`,
-    poNo: `PO-2026-${pad(i + 1)}`,
-    quotationId: q.id,
-    quotationNo: q.quotationNo,
-    customerName: q.customerName,
-    customerContact: pick(CONTACTS),
-    origin: q.origin,
-    destination: q.destination,
-    cargoType: q.cargoType,
-    cargoTonnage: q.cargoTonnage,
-    totalAmount: q.totalAmount,
-    poDate: addDays(TODAY, -int(1, 20)),
-    deliveryDate: addDays(TODAY, int(5, 30)),
+    quotationDate: requestDate,
+    salesName: pick(SALES_NAMES),
+    freightPrice: totalFreight,
+    freightCurrency: 'IDR',
+    freightBasis: 'Per MT',
     paymentTerms: pick(PAYMENT_TERMS_LIST),
-    shipmentType: pick(SHIPMENT_TYPES),
-    portOfLoading: pick(PORTS_LOADING),
-    portOfDischarge: pick(PORTS_DISCHARGE),
-    specialInstructions: i === 0 ? 'Ensure loading completed before laycan end date' : '',
-    status: i < 2 ? 'confirmed' : i < 4 ? 'completed' : 'draft',
-    notes: '',
+    freeTime: pick([3, 5, 7]),
+    freeTimeUnit: 'Days',
     createdBy: 'u-rina',
-    createdAt: addDays(TODAY, -int(1, 20)) + 'T10:00',
+    createdAt: addDays(requestDate, 1) + 'T09:00',
   })
 }
 
-// ---------- Sales Orders ----------
+// ---------- Sales Orders (created from approved quotations) ----------
 export const salesOrders: SalesOrder[] = []
-const confirmedPOs = purchaseOrders.filter((p) => p.status === 'confirmed' || p.status === 'completed')
-for (let i = 0; i < confirmedPOs.length; i++) {
-  const po = confirmedPOs[i]
-  const soDate = addDays(po.poDate, int(1, 3))
+const approvedQuotations = quotations.filter((q) => q.status === 'approved').slice(0, 4)
+for (let i = 0; i < approvedQuotations.length; i++) {
+  const quo = approvedQuotations[i]
+  const soDate = addDays(TODAY, -int(1, 20))
   salesOrders.push({
     id: `so-${pad(i + 1)}`,
     soNo: `SO-${TODAY.replace(/-/g, '').slice(0, 8)}-${pad(i + 1, 3)}`,
-    poId: po.id,
-    poNo: po.poNo,
-    customerName: po.customerName,
-    salesName: pick(SALES_NAMES),
-    shipmentType: pick(SHIPMENT_TYPES),
+    poNo: `PO-${quo.customerName.replace(/^PT /, "").slice(0, 3).toUpperCase()}-${pad(i + 1, 3)}`,
+    customerName: quo.customerName,
+    salesName: quo.salesName ?? pick(SALES_NAMES),
+    shipmentType: quo.shipmentType ?? pick(SHIPMENT_TYPES),
     laycanStart: addDays(soDate, int(5, 15)),
     laycanEnd: addDays(soDate, int(16, 25)),
     portOfLoading: pick(PORTS_LOADING),
     portOfDischarge: pick(PORTS_DISCHARGE),
     freeTime: pick([3, 5, 7]),
     freeTimeUnit: 'Days',
-    cargoType: po.cargoType,
+    cargoType: quo.cargoType,
     cargoWeight: int(5, 10) * 1000,
     cargoWeightUnit: 'MT',
     dwt: int(8, 12) * 1000,
@@ -207,22 +175,37 @@ for (let i = 0; i < confirmedPOs.length; i++) {
     freightPrice: int(300, 600) * 1000000,
     freightCurrency: 'IDR',
     freightBasis: 'Per Voyage',
-    paymentTerms: pick(PAYMENT_TERMS_LIST),
+    paymentTerms: quo.paymentTerms ?? pick(PAYMENT_TERMS_LIST),
     customerPic: pick(PIC_NAMES),
     customerPicPhone: `0812 ${int(1000, 9999)} ${int(1000, 9999)}`,
-    customerPicEmail: `${pick(PIC_NAMES).toLowerCase().replace(' ', '.')}@${po.customerName.toLowerCase().replace(/pt /g, '').replace(/ /g, '').slice(0, 10)}.co.id`,
+    customerPicEmail: `${pick(PIC_NAMES).toLowerCase().replace(' ', '.')}@${quo.customerName.toLowerCase().replace(/pt /g, '').replace(/ /g, '').slice(0, 10)}.co.id`,
     customerPicPosition: pick(PIC_POSITIONS),
-    remarks: i === 0 ? `Pengangkutan batubara dari ${po.origin} ke ${po.destination}.` : '',
-    origin: po.origin,
-    destination: po.destination,
-    totalAmount: po.totalAmount,
+    remarks: i === 0 ? `Pengangkutan batubara dari ${quo.origin} ke ${quo.destination}.` : '',
+    origin: quo.origin,
+    destination: quo.destination,
+    totalAmount: quo.totalAmount,
     soDate,
-    status: i < 1 ? 'active' : i < 3 ? 'completed' : 'draft',
+    status: i < 1 ? 'active' : i < 3 ? 'completed' : 'active',
     vesselAssigned: null,
     createdBy: 'u-rina',
     createdAt: soDate + 'T10:00',
   })
 }
+
+// Billing milestones follow each SO's payment terms; earlier orders are further along.
+salesOrders.forEach((so) => {
+  const billings = buildBillings(so.paymentTerms, so.totalAmount, so.freightCurrency)
+  billings.forEach((b, j) => {
+    b.id = `bill-${so.id}-${j}`
+    const invoiced = so.status === 'completed' || (so.id === 'so-001' && j < 2)
+    if (!invoiced) return
+    b.invoiceNo = `INV-${so.soNo.slice(3)}-${j + 1}`
+    b.invoicedAt = addDays(so.soDate, 3 + j * 4)
+    if (so.status === 'completed' || j < 1) { b.status = 'paid'; b.paidAt = addDays(b.invoicedAt, 5) } else b.status = 'invoiced'
+  })
+  so.billings = billings
+
+})
 
 // ---------- Commercial Sheets ----------
 export const commercialSheets: CommercialSheet[] = []

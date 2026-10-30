@@ -35,7 +35,7 @@ export default function App() {
               <Route path="admin/config" element={g('config.manage', <Config />)} />
               <Route path="admin/master" element={g('master.manage', <MasterData />)} />
               {/* Flow modules: Sales → Operations → Procurement → Finance */}
-              <Route path="sales/*" element={g('sales.read', <SalesModule />)} />
+              <Route path="sales/*" element={g(['sales.read', 'quotation.respond'], <SalesModule />)} />
               <Route path="operations/*" element={<OperationsModule />} />
               <Route path="procurement/*" element={g('procurement.read', <ProcurementModule />)} />
               <Route path="finance/*" element={<FinanceModule />} />

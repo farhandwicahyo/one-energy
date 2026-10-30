@@ -29,16 +29,16 @@ export interface ModuleDef {
 export const MODULES: ModuleDef[] = [
   {
     code: 'SALES', slug: 'sales', name: 'Sales', icon: Handshake,
-    hint: 'End-to-end commercial process: RFQ, quotation, negotiation, PO and SO.',
+    hint: 'End-to-end commercial process: quotation, negotiation and SO.',
     features: [
-      { to: '/sales/dashboard', label: 'Sales', hint: 'Sales dashboard, RFQ, quotation, PO, SO and commercial sheet.', icon: Handshake, perm: 'sales.read' },
+      { to: '/sales/dashboard', label: 'Sales', hint: 'Sales dashboard, quotation, SO and commercial sheet.', icon: Handshake, perm: ['sales.read', 'quotation.respond'] },
     ],
   },
   {
     code: 'OPERATIONAL', slug: 'operations', name: 'Operational', icon: Ship,
     hint: 'All vessel operations: crewing, documents, bunker, traffic, maintenance and port agency in one module.',
     features: [
-      { to: '/operations/dashboard', label: 'Operational', hint: 'Crewing, doc asset, bunker, traffic, maintenance & repair, port agency.', icon: Ship, perm: ['crew.read', 'asset.read', 'bunker.read', 'traffic.read', 'maintenance.read', 'keagenan.read'] },
+      { to: '/operations/dashboard', label: 'Operational', hint: 'Crewing, doc asset, bunker, traffic, maintenance & repair, port agency.', icon: Ship, perm: ['crew.read', 'asset.read', 'bunker.read', 'traffic.read', 'maintenance.read', 'keagenan.read', 'joborder.read'] },
     ],
   },
   {

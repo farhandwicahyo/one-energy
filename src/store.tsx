@@ -2,9 +2,9 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { config as seedConfig, docTypeById, docTypes as seedDocTypes, escalation as seedEscalation, rankByCode, ranks as masterRanks, roles as seedRoles, templates as seedTemplates, users as seedUsers, vesselTypes as seedVesselTypes } from './data/master'
 import { seed } from './data/seed'
-import { commercialSheets as seedCS, purchaseOrders as seedPOs, quotations as seedQuotations, rfqs as seedRFQs, salesOrders as seedSOs } from './data/sales-seed'
+import { commercialSheets as seedCS, quotations as seedQuotations, salesOrders as seedSOs } from './data/sales-seed'
 import { purchaseRequests as seedPRs } from './data/procurement-seed'
-import type { AuditDiff, AuditEntry, CommercialSheet, Crew, CrewPrivate, Doc, DocType, FollowUp, NegotiationRound, OpStatus, PurchaseOrder, PurchaseRequest, Quotation, Rank, RFQ, Readiness, RoleId, SalesOrder, Vessel, VesselAsset } from './data/types'
+import type { AuditDiff, AuditEntry, CommercialSheet, Crew, CrewPrivate, Doc, DocType, FollowUp, NegotiationRound, OpStatus, PurchaseRequest, Quotation, Rank, Readiness, RoleId, SalesOrder, Vessel, VesselAsset } from './data/types'
 import { addDays, nowStamp, TODAY } from './lib/dates'
 import { assessVessel, buildIndex, docStatus, worst, type Assessment } from './lib/rules'
 
@@ -21,9 +21,7 @@ function initialState() {
     escalation: clone(seedEscalation),
     vesselTypes: clone(seedVesselTypes),
     ranks: clone(masterRanks),
-    rfqs: clone(seedRFQs),
     quotations: clone(seedQuotations),
-    purchaseOrders: clone(seedPOs),
     salesOrders: clone(seedSOs),
     commercialSheets: clone(seedCS),
     purchaseRequests: clone(seedPRs),
@@ -82,15 +80,12 @@ interface Store {
   saveVesselType: (t: State['vesselTypes'][number]) => void
   saveRank: (r: Rank, isNew: boolean) => void
   // Sales
-  addRFQ: (data: Omit<RFQ, 'id' | 'rfqNo' | 'createdBy' | 'createdAt'>) => string
   addQuotation: (data: Omit<Quotation, 'id' | 'quotationNo' | 'negotiations' | 'currentRound' | 'status' | 'createdBy' | 'createdAt'>) => string
   updateQuotation: (id: string, patch: Partial<Quotation>) => void
   submitNegotiation: (quotationId: string, salesPrice: number) => void
   approveNegotiation: (quotationId: string, round: number) => void
   rejectNegotiation: (quotationId: string, round: number) => void
   customerRespondNegotiation: (quotationId: string, round: number, response: 'ok' | 'reject') => void
-  addPO: (data: Omit<PurchaseOrder, 'id' | 'poNo' | 'createdBy' | 'createdAt'>) => string
-  updatePO: (id: string, patch: Partial<PurchaseOrder>) => void
   addSO: (data: Omit<SalesOrder, 'id' | 'soNo' | 'createdBy' | 'createdAt'>) => string
   updateSO: (id: string, patch: Partial<SalesOrder>) => void
   addCommercialSheet: (data: Omit<CommercialSheet, 'id' | 'csNo' | 'createdBy' | 'createdAt'>) => string
@@ -524,17 +519,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   } as Store
 
   // ---------- Sales ----------
-  store.addRFQ = (data) => {
-    const id = `rfq-x-${Date.now()}`
-    const rfqNo = `RFQ-2026-${String(s.rfqs.length + 1).padStart(4, '0')}`
-    setS((st) => ({
-      ...st,
-      rfqs: [...st.rfqs, { ...data, id, rfqNo, createdBy: me.id, createdAt: nowStamp() }],
-      audit: audit({ action: 'insert', table: 'tbl_t_rfq', rowLabel: rfqNo, diff: [{ field: 'customer', before: null, after: data.customerName }] }, st),
-    }))
-    return id
-  }
-
   store.addQuotation = (data) => {
     const id = `quo-x-${Date.now()}`
     const quotationNo = `QUO-2026-${String(s.quotations.length + 1).padStart(4, '0')}`
@@ -597,22 +581,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       quotations: st.quotations.map((x) => (x.id === quotationId ? { ...x, status, negotiations: negs } : x)),
       audit: audit({ action: 'update', table: 'tbl_t_negotiation', rowLabel: `${q.quotationNo} R${round}`, diff: [{ field: 'customer_response', before: 'pending', after: response }] }, st),
     }
-  })
-
-  store.addPO = (data) => {
-    const id = `po-x-${Date.now()}`
-    const poNo = `PO-2026-${String(s.purchaseOrders.length + 1).padStart(4, '0')}`
-    setS((st) => ({
-      ...st,
-      purchaseOrders: [...st.purchaseOrders, { ...data, id, poNo, createdBy: me.id, createdAt: nowStamp() }],
-      audit: audit({ action: 'insert', table: 'tbl_t_po', rowLabel: poNo, diff: [{ field: 'quotation_ref', before: null, after: data.quotationNo }, { field: 'total', before: null, after: String(data.totalAmount) }] }, st),
-    }))
-    return id
-  }
-
-  store.updatePO = (id, patch) => setS((st) => {
-    const p = st.purchaseOrders.find((x) => x.id === id)!
-    return { ...st, purchaseOrders: st.purchaseOrders.map((x) => (x.id === id ? { ...x, ...patch } : x)), audit: audit({ action: 'update', table: 'tbl_t_po', rowLabel: p.poNo, diff: diffOf(p, patch) }, st) }
   })
 
   store.addSO = (data) => {

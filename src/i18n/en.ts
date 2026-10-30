@@ -49,6 +49,7 @@ export const roleLabel: Record<RoleId, string> = {
   ops_keagenan: 'Operational Port Agency',
   procurement: 'Procurement',
   finance: 'Finance',
+  customer: 'Customer',
 }
 
 export const vesselKindLabel = { TB: 'Tug Boat', BG: 'Barge' } as const

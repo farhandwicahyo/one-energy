@@ -82,12 +82,14 @@ export const users: User[] = [
   { id: 'u-lina', name: 'Lina Marlina', username: 'lina.m', email: 'lina.m@oneenergy.co.id', phone: '+62 811-4478-5520', roles: ['ops_keagenan'], active: true, lastLogin: '2026-10-20T15:30' },
   { id: 'u-dewi', name: 'Dewi Lestari', username: 'dewi.l', email: 'dewi.l@oneenergy.co.id', phone: '+62 812-7780-3345', roles: ['procurement'], active: true, lastLogin: '2026-10-21T08:45' },
   { id: 'u-nina', name: 'Nina Permata', username: 'nina.p', email: 'nina.p@oneenergy.co.id', phone: '+62 811-6643-8890', roles: ['finance'], active: true, lastLogin: '2026-10-21T08:30' },
+  { id: 'u-customer', name: 'Agus Prasetyo (Customer)', username: 'agus.p', email: 'agus.p@customer.co.id', phone: '+62 812-5500-1200', roles: ['customer'], active: true, lastLogin: '2026-10-21T09:00' },
 ]
 
 export const permissionCatalog: { group: string; items: { code: string; label: string; sensitive?: boolean }[] }[] = [
   { group: 'Sales', items: [
     { code: 'sales.read', label: 'View sales data' },
     { code: 'sales.write', label: 'Create and edit sales' },
+    { code: 'quotation.respond', label: 'View and respond to own quotations (customer)' },
   ] },
   { group: 'Operational · Doc Asset TB & BG', items: [
     { code: 'vessel.read', label: 'View vessels' },
@@ -108,6 +110,10 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
     { code: 'contract.read', label: 'View contracts', sensitive: true },
     { code: 'assignment.write', label: 'Sign on / sign off' },
     { code: 'composition.manage', label: 'Manage minimum composition' },
+  ] },
+  { group: 'Operational · Job Order', items: [
+    { code: 'joborder.read', label: 'View job orders' },
+    { code: 'joborder.write', label: 'Accept and complete job orders' },
   ] },
   { group: 'Operational · Bunker', items: [
     { code: 'bunker.read', label: 'View bunker data' },
@@ -155,15 +161,16 @@ export const permissionCatalog: { group: string; items: { code: string; label: s
 
 export const roles: Role[] = [
   { id: 'superadmin', name: 'Super Admin', description: 'Full access to all modules and features across the entire system.', permissions: permissionCatalog.flatMap((g) => g.items.map((i) => i.code)).concat(['user.manage', 'role.manage', 'audit.read', 'config.manage', 'master.manage']) },
-  { id: 'sales', name: 'Sales', description: 'Manages the commercial process from RFQ to Sales Order.', permissions: ['sales.read', 'sales.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_crewing', name: 'Operational Crewing', description: 'Operational module: Crewing only (crew, assignments, manning, contracts).', permissions: ['crew.read', 'crew.write', 'crew_private.read', 'contract.read', 'assignment.write', 'composition.manage', 'vessel.read', 'document.read', 'document_crew.write', 'readiness.read', 'dashboard.tasks'] },
-  { id: 'ops_asset', name: 'Operational Doc Asset', description: 'Operational module: Documents Asset TB & BG (vessels, pairs, certificates, regulatory compliance).', permissions: ['vessel.read', 'vessel.write', 'vessel.status_change', 'vessel.pair_manage', 'asset.read', 'asset.write', 'document.read', 'document_vessel.write', 'document_crew.write', 'followup.write', 'readiness.read', 'dashboard.tasks'] },
-  { id: 'ops_bunker', name: 'Operational Bunker', description: 'Operational module: Bunker only (fuel planning, delivery, consumption, stock).', permissions: ['bunker.read', 'bunker.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_traffic', name: 'Operational Traffic', description: 'Operational module: Traffic only (voyage planning, tracking, reporting).', permissions: ['traffic.read', 'traffic.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_repair', name: 'Operational Maintenance & Repair', description: 'Operational module: Maintenance & Repair only.', permissions: ['maintenance.read', 'maintenance.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'ops_keagenan', name: 'Operational Port Agency', description: 'Operational module: Port Agency & Logistics only.', permissions: ['keagenan.read', 'keagenan.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'sales', name: 'Sales', description: 'Manages the commercial process from Quotation to Sales Order.', permissions: ['sales.read', 'sales.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_crewing', name: 'Operational Crewing', description: 'Operational module: Crewing only (crew, assignments, manning, contracts).', permissions: ['joborder.read', 'crew.read', 'crew.write', 'crew_private.read', 'contract.read', 'assignment.write', 'composition.manage', 'vessel.read', 'document.read', 'document_crew.write', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'ops_asset', name: 'Operational Doc Asset', description: 'Operational module: Documents Asset TB & BG (vessels, pairs, certificates, regulatory compliance).', permissions: ['joborder.read', 'vessel.read', 'vessel.write', 'vessel.status_change', 'vessel.pair_manage', 'asset.read', 'asset.write', 'document.read', 'document_vessel.write', 'document_crew.write', 'followup.write', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'ops_bunker', name: 'Operational Bunker', description: 'Operational module: Bunker only (fuel planning, delivery, consumption, stock).', permissions: ['joborder.read', 'bunker.read', 'bunker.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_traffic', name: 'Operational Traffic', description: 'Operational module: Traffic only (voyage planning, tracking, reporting).', permissions: ['joborder.read', 'joborder.write', 'traffic.read', 'traffic.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_repair', name: 'Operational Maintenance & Repair', description: 'Operational module: Maintenance & Repair only.', permissions: ['joborder.read', 'maintenance.read', 'maintenance.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
+  { id: 'ops_keagenan', name: 'Operational Port Agency', description: 'Operational module: Port Agency & Logistics only.', permissions: ['joborder.read', 'keagenan.read', 'keagenan.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
   { id: 'procurement', name: 'Procurement', description: 'Manages purchasing, vendors, delivery and document support.', permissions: ['procurement.read', 'procurement.write', 'doc_support.read', 'doc_support.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
   { id: 'finance', name: 'Finance', description: 'Manages billing to customer and payment to vendor, including invoicing, 3-way matching and accounts.', permissions: ['billing.read', 'billing.write', 'payment.read', 'payment.write', 'sales.read', 'procurement.read', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'customer', name: 'Customer', description: 'External customer: views the quotations sent to them and accepts or negotiates the price.', permissions: ['quotation.respond'] },
 ]
 
 export const templates: Template[] = [

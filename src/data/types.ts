@@ -7,7 +7,7 @@ export type DocStatus = 'valid' | 'soon' | 'expired'
 export type FollowUp = 'pending' | 'in_progress' | 'done'
 export type CrewStatus = 'on_duty' | 'leave' | 'standby' | 'inactive'
 export type Employment = 'permanent' | 'contract'
-export type RoleId = 'superadmin' | 'sales' | 'ops_crewing' | 'ops_asset' | 'ops_bunker' | 'ops_traffic' | 'ops_repair' | 'ops_keagenan' | 'procurement' | 'finance'
+export type RoleId = 'superadmin' | 'sales' | 'ops_crewing' | 'ops_asset' | 'ops_bunker' | 'ops_traffic' | 'ops_repair' | 'ops_keagenan' | 'procurement' | 'finance' | 'customer'
 
 export interface Vessel {
   id: string
@@ -241,31 +241,14 @@ export interface AuditEntry {
 // ---------- Sales ----------
 export type NegotiationStatus = 'draft' | 'waiting_approval' | 'approved' | 'sent_to_customer' | 'customer_ok' | 'customer_reject' | 'revision' | 'expired'
 export type QuotationStatus = 'draft' | 'negotiation' | 'approved' | 'rejected' | 'expired'
-export type POStatus = 'draft' | 'confirmed' | 'completed' | 'cancelled'
 export type SOStatus = 'draft' | 'active' | 'completed' | 'cancelled'
-
-export interface RFQ {
-  id: string
-  rfqNo: string
-  customerName: string
-  customerContact: string
-  origin: string
-  destination: string
-  cargoType: string
-  cargoTonnage: number
-  requestDate: string
-  validUntil: string
-  notes: string
-  files: RFQFileRef[]
-  createdBy: string
-  createdAt: string
-}
 
 export interface QuotationItem {
   description: string
   unit: string
   qty: number
   unitPrice: number
+  currency?: string
   amount: number
 }
 
@@ -283,7 +266,26 @@ export interface NegotiationRound {
 export interface Quotation {
   id: string
   quotationNo: string
-  rfqId: string
+  customerAddress?: string
+  rfqFiles?: QuotationFileRef[]
+  customerId?: string
+  consigneeName?: string
+  consigneeId?: string
+  shipperName?: string
+  shipperId?: string
+  shipmentType?: string
+  portOfLoading?: string
+  portOfDischarge?: string
+  polLat?: string
+  polLng?: string
+  podLat?: string
+  podLng?: string
+  dwt?: number
+  dwtUnit?: string
+  customerPic?: string
+  customerPicPhone?: string
+  customerPicEmail?: string
+  customerPicPosition?: string
   customerName: string
   origin: string
   destination: string
@@ -295,31 +297,28 @@ export interface Quotation {
   status: QuotationStatus
   negotiations: NegotiationRound[]
   currentRound: number
-  createdBy: string
-  createdAt: string
-}
-
-export interface PurchaseOrder {
-  id: string
-  poNo: string
-  quotationId: string
-  quotationNo: string
-  customerName: string
-  customerContact: string
-  origin: string
-  destination: string
-  cargoType: string
-  cargoTonnage: number
-  totalAmount: number
-  poDate: string
-  deliveryDate: string
-  paymentTerms: string
-  shipmentType: string
-  portOfLoading: string
-  portOfDischarge: string
-  specialInstructions: string
-  status: POStatus
-  notes: string
+  quotationDate?: string
+  salesName?: string
+  laycanStart?: string
+  laycanEnd?: string
+  tugBoatId?: string
+  tugBoatName?: string
+  tugLastLocation?: string
+  tugLastLat?: string
+  tugLastLng?: string
+  bargeId?: string
+  bargeName?: string
+  bargeLastLocation?: string
+  bargeLastLat?: string
+  bargeLastLng?: string
+  freightPrice?: number
+  freightCurrency?: string
+  freightBasis?: string
+  paymentTerms?: string
+  freeTime?: number
+  freeTimeUnit?: string
+  demurrageRate?: number
+  terms?: string
   createdBy: string
   createdAt: string
 }
@@ -327,7 +326,6 @@ export interface PurchaseOrder {
 export interface SalesOrder {
   id: string
   soNo: string
-  poId: string
   poNo: string
   customerName: string
   salesName: string
@@ -358,6 +356,31 @@ export interface SalesOrder {
   soDate: string
   status: SOStatus
   vesselAssigned: string | null
+  customerAddress?: string
+  demurrageRate?: number
+  items?: QuotationItem[]
+  poFiles?: QuotationFileRef[]
+  jobStatus?: 'new' | 'in_progress' | 'completed'
+  billings?: SalesBilling[]
+  customerId?: string
+  shipperName?: string
+  shipperId?: string
+  consigneeName?: string
+  consigneeId?: string
+  tugBoatId?: string
+  tugBoatName?: string
+  tugLastLocation?: string
+  tugLastLat?: string
+  tugLastLng?: string
+  bargeId?: string
+  bargeName?: string
+  bargeLastLocation?: string
+  bargeLastLat?: string
+  bargeLastLng?: string
+  polLat?: string
+  polLng?: string
+  podLat?: string
+  podLng?: string
   createdBy: string
   createdAt: string
 }
@@ -400,7 +423,6 @@ export interface CommercialSheet {
   createdAt: string
 }
 
-export type RFQFileRef = { id: string; name: string; sizeKb: number; uploadedAt: string }
 
 // ---------- Procurement ----------
 export type PRStatus = 'draft' | 'pending_dept_head' | 'pending_finance' | 'pending_procurement' | 'pending_management' | 'approved' | 'rejected'
@@ -500,4 +522,18 @@ export interface Escalation {
   daysBefore: number
   recipientRole: RoleId
   channels: ('whatsapp' | 'email')[]
+}
+
+export type QuotationFileRef = { id: string; name: string; sizeKb: number; uploadedAt: string; docType?: string }
+
+export interface SalesBilling {
+  id: string
+  term: string
+  percent: number
+  amount: number
+  currency: string
+  status: 'planned' | 'invoiced' | 'paid'
+  invoiceNo?: string
+  invoicedAt?: string
+  paidAt?: string
 }

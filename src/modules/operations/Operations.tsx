@@ -14,6 +14,7 @@ import { Guard } from '../../components/Shell'
 import { VesselList, VesselDetail, PairManager } from '../doc-asset/Vessels'
 import { CrewList, CrewDetail, Composition } from '../crewing/Crew'
 import { DocumentList, DocumentDetail, DocumentTypes, RequiredDocs } from '../documents/Documents'
+import { JobOrderList, JobOrderDetail, isJobOrder, jobStatusOf } from './JobOrder'
 
 interface NavItem { key: string; label: string; icon: LucideIcon; path: string }
 interface NavGroup { key: string; label: string; icon: LucideIcon; items: NavItem[] }
@@ -77,6 +78,13 @@ function SidebarContent({ pathname, onNav, collapsed }: { pathname: string; onNa
         collapsed ? 'justify-center px-0' : 'px-3',
         isDashboard ? 'bg-accent text-white' : 'text-[var(--color-nav-ink)] hover:bg-white/10',
       )}><LayoutDashboard className="size-4 shrink-0" />{!collapsed && ' Dashboard'}</Link>
+      {can('joborder.read') && (
+        <Link to="/operations/job-order" onClick={onNav} title="Job Order" className={cx(
+          'flex items-center gap-2.5 rounded-lg py-2.5 text-[15px] font-semibold transition-colors',
+          collapsed ? 'justify-center px-0' : 'px-3',
+          pathname.startsWith('/operations/job-order') ? 'bg-accent text-white' : 'text-[var(--color-nav-ink)] hover:bg-white/10',
+        )}><ClipboardCheck className="size-4 shrink-0" />{!collapsed && ' Job Order'}</Link>
+      )}
       {groups.map((g) => {
         const Icon = g.icon
         const isOpen = open.has(g.key)
@@ -151,6 +159,7 @@ function OpsDashboard() {
     <div>
       <h1 className="judul mb-5 text-[2rem] uppercase">Operational Dashboard</h1>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {can('joborder.read') && <Stat label="Open Job Orders" value={s.salesOrders.filter((so) => isJobOrder(so) && jobStatusOf(so) !== 'completed').length} to="/operations/job-order" />}
         {asset && <Stat label="Total Vessels" value={s.vessels.length} to="/operations/vessels" />}
         {crew && <Stat label="Total Crew" value={s.crew.length} to="/operations/crew" />}
         {asset && <Stat label="Active Documents" value={s.docs.filter((d) => d.isCurrent).length} to="/operations/documents" />}
@@ -212,6 +221,9 @@ export default function OperationsModule() {
   const perm = GROUP_PERM[{ crew: 'crewing', vessels: 'doc-asset', documents: 'doc-asset', bunker: 'bunker', traffic: 'traffic', maintenance: 'maintenance', keagenan: 'keagenan' }[s0] ?? '']
   let content: JSX.Element
   switch (s0) {
+    case 'job-order':
+      content = <Guard perm="joborder.read">{s1 ? <JobOrderDetail id={s1} /> : <JobOrderList />}</Guard>
+      break
     case 'crew':
       if (s1 === 'composition') content = <Composition />
       else if (s1) content = <CrewDetail />
