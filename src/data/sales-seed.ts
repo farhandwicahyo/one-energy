@@ -197,11 +197,11 @@ salesOrders.forEach((so) => {
   const billings = buildBillings(so.paymentTerms, so.totalAmount, so.freightCurrency)
   billings.forEach((b, j) => {
     b.id = `bill-${so.id}-${j}`
-    const invoiced = so.status === 'completed' || (so.id === 'so-001' && j < 2)
-    if (!invoiced) return
-    b.invoiceNo = `INV-${so.soNo.slice(3)}-${j + 1}`
-    b.invoicedAt = addDays(so.soDate, 3 + j * 4)
-    if (so.status === 'completed' || j < 1) { b.status = 'paid'; b.paidAt = addDays(b.invoicedAt, 5) } else b.status = 'invoiced'
+    const paid = so.status === 'completed' || (so.id === 'so-001' && j < 1)
+    if (!paid) return
+    b.status = 'paid'
+    b.paidAt = addDays(so.soDate, 5 + j * 4)
+    b.paidBy = 'Nina Permata'
   })
   so.billings = billings
 

@@ -11,7 +11,7 @@ import {
 } from '../../components/ui'
 import { fmtDate, TODAY } from '../../lib/dates'
 import { billingLabel, billingStage, billingSummary, buildBillings } from '../../lib/billing'
-import type { CommercialSheet, Quotation, SalesBilling, SalesOrder } from '../../data/types'
+import type { CommercialSheet, Quotation, SalesOrder } from '../../data/types'
 
 const idr = (n: number) => `IDR ${new Intl.NumberFormat('en-US').format(n)}`
 // A sales order is In progress until every billing term is paid, then Completed.
@@ -607,19 +607,14 @@ function SOCreatePage() {
 }
 
 function SODetailPage({ id }: { id: string }) {
-  const { s, updateSO, can } = useStore()
-  const billingTone: Record<string, Tone> = { not_billed: 'neutral', partially_billed: 'accent', billed: 'warn', paid: 'ok' }
+  const { s, can } = useStore()
+  const billingTone: Record<string, Tone> = { waiting_payment: 'warn', paid: 'ok' }
   const so = s.salesOrders.find((so) => so.id === id)
   const statusTone: Record<string, Tone> = { draft: 'neutral', active: 'accent', completed: 'ok', cancelled: 'bad' }
   if (!so) return <div><BackButton to="/sales/so" label="Sales Order" /><Empty title="SO not found">The requested SO does not exist.</Empty></div>
   const soBillings = so.billings ?? []
   const soTotal = soBillings.reduce((a, b) => a + b.amount, 0)
-  const soBilled = soBillings.filter((b) => b.status !== 'planned').reduce((a, b) => a + b.amount, 0)
   const soPaid = soBillings.filter((b) => b.status === 'paid').reduce((a, b) => a + b.amount, 0)
-  const setBilling = (i: number, patch: Partial<SalesBilling>) => {
-    const billings = soBillings.map((b, j) => (j === i ? { ...b, ...patch } : b))
-    updateSO(so.id, billings.every((b) => b.status === 'paid') ? { billings, status: 'completed' } : { billings })
-  }
   return (
     <div>
       <BackButton to="/sales/so" label="Sales Order" />
@@ -653,29 +648,24 @@ function SODetailPage({ id }: { id: string }) {
         <div className={section}><div className={sectionTitle}>Billing</div><div className="space-y-3 p-4">
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className="text-ink-2">Billing status</span><Badge t={billingTone[billingSummary(so.billings)]}>{billingLabel[billingSummary(so.billings)]}</Badge>
-            <span className="text-ink-2">Billed {soBilled.toLocaleString()} / {soTotal.toLocaleString()} {so.freightCurrency} · Paid {soPaid.toLocaleString()}</span>
+            <span className="text-ink-2">Paid {soPaid.toLocaleString()} / {soTotal.toLocaleString()} {so.freightCurrency}</span>
           </div>
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-line bg-surface-2"><th className="px-3 py-2 text-left font-medium">Milestone</th><th className="px-3 py-2 text-right font-medium">%</th><th className="px-3 py-2 text-right font-medium">Amount</th><th className="px-3 py-2 text-left font-medium">Invoice No</th><th className="px-3 py-2 text-left font-medium">Invoiced</th><th className="px-3 py-2 text-left font-medium">Paid</th><th className="px-3 py-2 text-left font-medium">Status</th><th className="w-40" /></tr></thead>
-              <tbody>{(so.billings ?? []).map((b, i) => (
+              <thead><tr className="border-b border-line bg-surface-2"><th className="px-3 py-2 text-left font-medium">Milestone</th><th className="px-3 py-2 text-right font-medium">%</th><th className="px-3 py-2 text-right font-medium">Amount</th><th className="px-3 py-2 text-left font-medium">Paid</th><th className="px-3 py-2 text-left font-medium">Status</th><th className="px-3 py-2 text-left font-medium">Marked paid by</th></tr></thead>
+              <tbody>{(so.billings ?? []).map((b) => (
                 <tr key={b.id} className="border-t border-line">
                   <td className="px-3 py-2">{b.term}</td>
                   <td className="px-3 py-2 text-right">{b.percent}%</td>
                   <td className="px-3 py-2 text-right font-semibold">{b.currency} {b.amount.toLocaleString()}</td>
-                  <td className="px-3 py-2">{b.invoiceNo ?? '-'}</td>
-                  <td className="px-3 py-2">{b.invoicedAt ? fmtDate(b.invoicedAt) : '-'}</td>
                   <td className="px-3 py-2">{b.paidAt ? fmtDate(b.paidAt) : '-'}</td>
-                  <td className="px-3 py-2"><Badge t={b.status === 'paid' ? 'ok' : b.status === 'invoiced' ? 'accent' : 'neutral'}>{b.status}</Badge></td>
-                  <td className="px-3 py-2 text-right">
-                    {can('billing.write') && so.status !== 'draft' && b.status === 'planned' && <Button size="sm" onClick={() => setBilling(i, { status: 'invoiced', invoiceNo: `INV-${so.soNo.slice(3)}-${i + 1}`, invoicedAt: TODAY })}>Issue Invoice</Button>}
-                    {can('billing.write') && b.status === 'invoiced' && <Button size="sm" onClick={() => setBilling(i, { status: 'paid', paidAt: TODAY })}>Mark Paid</Button>}
-                  </td>
+                  <td className="px-3 py-2"><Badge t={b.status === 'paid' ? 'ok' : 'warn'}>{b.status === 'paid' ? 'Paid' : 'Waiting payment'}</Badge></td>
+                  <td className="px-3 py-2">{b.paidBy ?? '-'}{b.proof && (b.proof.dataUrl ? <a href={b.proof.dataUrl} target="_blank" rel="noreferrer" className="block text-xs font-semibold text-accent hover:underline">View proof</a> : <span className="block text-xs text-ink-2">{b.proof.name}</span>)}</td>
                 </tr>
               ))}</tbody>
             </table>
           </div>
-          <p className="text-xs text-ink-2">{so.status === 'draft' ? 'Invoices can be issued once this SO is submitted.' : can('billing.write') ? 'Issue an invoice when the milestone is reached, then mark it paid on receipt.' : 'Finance issues the invoices and records the payments.'}</p>
+          <p className="text-xs text-ink-2">Billing status is updated by Finance from the Finance module. This order completes when every term is paid.</p>
         </div></div>
         <div className={section}><div className={sectionTitle}>Output Documents</div>
           <div className="grid gap-3 p-4 sm:grid-cols-3">
@@ -710,7 +700,7 @@ function SOPage() {
     { key: 'customer', header: 'Customer', cell: (r) => r.customerName },
     { key: 'route', header: 'Route', cell: (r) => `${r.portOfLoading || r.origin} → ${r.portOfDischarge || r.destination}` },
     { key: 'amount', header: 'Freight', cell: (r) => idr(r.freightPrice), className: 'text-right' },
-    { key: 'billing', header: 'Billing', cell: (r) => <div><Badge t={({ not_billed: 'neutral', partially_billed: 'accent', billed: 'warn', paid: 'ok' } as Record<string, Tone>)[billingSummary(r.billings)]}>{billingLabel[billingSummary(r.billings)]}</Badge>{r.status !== 'draft' && <div className="mt-1 text-xs text-ink-2">{billingStage(r.billings)}</div>}</div> },
+    { key: 'billing', header: 'Billing', cell: (r) => <div><Badge t={({ waiting_payment: 'warn', paid: 'ok' } as Record<string, Tone>)[billingSummary(r.billings)]}>{billingLabel[billingSummary(r.billings)]}</Badge>{r.status !== 'draft' && <div className="mt-1 text-xs text-ink-2">{billingStage(r.billings)}</div>}</div> },
     { key: 'date', header: 'SO Date', cell: (r) => fmtDate(r.soDate) },
     { key: 'status', header: 'Status', cell: (r) => <Badge t={statusTone[r.status]}>{soStatusLabel[r.status]}</Badge> },
   ]

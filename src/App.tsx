@@ -38,7 +38,7 @@ export default function App() {
               <Route path="sales/*" element={g(['sales.read', 'quotation.respond'], <SalesModule />)} />
               <Route path="operations/*" element={<OperationsModule />} />
               <Route path="procurement/*" element={g('procurement.read', <ProcurementModule />)} />
-              <Route path="finance/*" element={<FinanceModule />} />
+              <Route path="finance/*" element={g(['billing.read', 'payment.read'], <FinanceModule />)} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

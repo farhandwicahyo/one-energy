@@ -532,8 +532,8 @@ export interface SalesBilling {
   percent: number
   amount: number
   currency: string
-  status: 'planned' | 'invoiced' | 'paid'
-  invoiceNo?: string
-  invoicedAt?: string
+  status: 'waiting_payment' | 'paid'
+  proof?: { name: string; sizeKb: number; dataUrl?: string }
   paidAt?: string
+  paidBy?: string
 }

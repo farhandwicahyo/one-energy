@@ -6,6 +6,8 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cx, Empty, ModuleFooter, PageHeader, Panel, Stat } from '../../components/ui'
+import { CustomerInvoicePage, PaymentReceiptPage, useBillingStats } from './CustomerBilling'
+import { BillingOrderDetail } from './BillingOrder'
 
 interface NavItem { key: string; label: string; icon: LucideIcon; path: string }
 interface NavGroup { key: string; label: string; icon: LucideIcon; items: NavItem[] }
@@ -105,17 +107,18 @@ function ModuleShell({ pathname, children }: { pathname: string; children: React
 }
 
 function FinanceDashboard() {
+  const bill = useBillingStats()
   return (
     <div>
       <h1 className="judul mb-5 text-[2rem] uppercase">Finance Dashboard</h1>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Invoices" value="—" />
-        <Stat label="Pending Payments" value="—" />
-        <Stat label="Receivable" value="—" />
+        <Stat label="Paid Terms" value={bill.paid} to="/finance/billing/receipt" />
+        <Stat label="Waiting Payment" value={bill.waiting} to="/finance/billing/invoice" />
+        <Stat label="Receivable (IDR)" value={new Intl.NumberFormat("en-US").format(bill.receivable)} to="/finance/billing/receipt" />
         <Stat label="Payable" value="—" />
       </div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Panel title="Billing to Customer"><p className="text-sm text-ink-2">Customer billing features will be available in the next phase.</p></Panel>
+        <Panel title="Billing to Customer"><p className="text-sm text-ink-2">{bill.waiting} billing term(s) are waiting for payment. Finance marks a term as paid on the sales order page, with proof of payment.</p></Panel>
         <Panel title="Payment to Vendor"><p className="text-sm text-ink-2">Vendor payment features will be available in the next phase.</p></Panel>
       </div>
     </div>
@@ -132,13 +135,15 @@ export default function FinanceModule() {
   const segments = rest.split('/')
   const s0 = segments[0] || 'dashboard'
   const s1 = segments[1] || ''
+  const s2 = segments[2] || ''
 
   let content: JSX.Element
   switch (s0) {
     case 'billing':
-      content = s1 === 'invoice' ? <ComingSoon title="Customer Invoice" />
+      if ((s1 === 'invoice' || s1 === 'receipt') && s2) { content = <BillingOrderDetail id={s2} from={s1} />; break }
+      content = s1 === 'invoice' ? <CustomerInvoicePage />
         : s1 === 'timesheet' ? <ComingSoon title="Time Sheet" />
-        : s1 === 'receipt' ? <ComingSoon title="Payment Receipt" />
+        : s1 === 'receipt' ? <PaymentReceiptPage />
         : s1 === 'receivable' ? <ComingSoon title="Account Receivable" />
         : <ComingSoon title="Billing" />
       break

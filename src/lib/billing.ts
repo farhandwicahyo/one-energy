@@ -12,29 +12,35 @@ export function buildBillings(terms: string, total: number, currency: string): S
     percent: m.percent,
     amount: Math.round((total * m.percent) / 100),
     currency,
-    status: 'planned',
+    status: 'waiting_payment',
   }))
 }
 
-export type BillingSummary = 'not_billed' | 'partially_billed' | 'billed' | 'paid'
+export type BillingSummary = 'waiting_payment' | 'paid'
 
+// An order is "Waiting payment" until every term is paid.
 export function billingSummary(billings?: SalesBilling[]): BillingSummary {
-  if (!billings || billings.length === 0 || billings.every((b) => b.status === 'planned')) return 'not_billed'
-  if (billings.every((b) => b.status === 'paid')) return 'paid'
-  if (billings.every((b) => b.status !== 'planned')) return 'billed'
-  return 'partially_billed'
+  return billings && billings.length > 0 && billings.every((b) => b.status === 'paid') ? 'paid' : 'waiting_payment'
 }
 
-export const billingLabel: Record<BillingSummary, string> = {
-  not_billed: 'Not billed', partially_billed: 'Partially billed', billed: 'Billed', paid: 'Paid',
-}
+export const billingLabel: Record<BillingSummary, string> = { waiting_payment: 'Waiting payment', paid: 'Paid' }
 
-// Where the order stands against its payment terms, e.g. "Term 2/3 · 50% When start to sailing · invoiced, awaiting payment".
+// Where the order stands against its payment terms, e.g. "Term 2/3 · 50% When start to sailing · waiting payment (1 of 3 paid)".
 export function billingStage(billings?: SalesBilling[]): string {
   if (!billings || billings.length === 0) return ''
   const n = billings.length
   const idx = billings.findIndex((b) => b.status !== 'paid')
   if (idx === -1) return `All ${n} terms paid`
   const b = billings[idx]
-  return `Term ${idx + 1}/${n} · ${b.percent}% ${b.term} · ${b.status === 'invoiced' ? 'invoiced, awaiting payment' : 'to be invoiced'}`
+  return `Term ${idx + 1}/${n} · ${b.percent}% ${b.term} · waiting payment (${idx} of ${n} paid)`
+}
+
+// Patch for updateSO after one milestone changes; the order completes once every term is paid.
+
+export function billingPatch(billings: SalesBilling[], index: number, change: Partial<SalesBilling>): { billings: SalesBilling[]; status?: 'completed' } {
+
+  const next = billings.map((b, j) => (j === index ? { ...b, ...change } : b))
+
+  return next.every((b) => b.status === 'paid') ? { billings: next, status: 'completed' } : { billings: next }
+
 }

@@ -169,7 +169,7 @@ export const roles: Role[] = [
   { id: 'ops_repair', name: 'Operational Maintenance & Repair', description: 'Operational module: Maintenance & Repair only.', permissions: ['joborder.read', 'maintenance.read', 'maintenance.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
   { id: 'ops_keagenan', name: 'Operational Port Agency', description: 'Operational module: Port Agency & Logistics only.', permissions: ['joborder.read', 'keagenan.read', 'keagenan.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
   { id: 'procurement', name: 'Procurement', description: 'Manages purchasing, vendors, delivery and document support.', permissions: ['procurement.read', 'procurement.write', 'doc_support.read', 'doc_support.write', 'vessel.read', 'readiness.read', 'dashboard.operations'] },
-  { id: 'finance', name: 'Finance', description: 'Manages billing to customer and payment to vendor, including invoicing, 3-way matching and accounts.', permissions: ['billing.read', 'billing.write', 'payment.read', 'payment.write', 'sales.read', 'procurement.read', 'readiness.read', 'dashboard.tasks'] },
+  { id: 'finance', name: 'Finance', description: 'Manages billing to customer and payment to vendor, including invoicing, 3-way matching and accounts.', permissions: ['billing.read', 'billing.write', 'payment.read', 'payment.write', 'dashboard.tasks'] },
   { id: 'customer', name: 'Customer', description: 'External customer: views the quotations sent to them and accepts or negotiates the price.', permissions: ['quotation.respond'] },
 ]
 
